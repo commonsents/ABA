@@ -69,7 +69,6 @@ def chooseResponse(userInput):
         #CHP()
         old_password = input("Please enter the current password associated with this userID: ")
         database.change_password(old_password)
-        quit()
 
     elif(command_List.get(userInput[0]) == 7):
         #ADU()
