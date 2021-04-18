@@ -5,6 +5,7 @@
 import sys
 import csv
 from Account_Entry import *
+from Authentication import Authentication
 
 version_Num = "1.1"
 command_List = {"HLP": 1, "LIN": 2, "LOU": 3, "EXT": 4, "IMD": 5, "CHP": 6, "ADU": 7, "DEU": 8, "LSU": 9, "DAL": 10, "ADR": 11, "DER": 12, "EDR": 13, "RER": 14, "EXD": 15}
@@ -37,6 +38,13 @@ def chooseResponse(userInput):
 
         #if len(userInput)> 1:
         #   LIN(userInput[1])
+        if len(database.dictionary) == 0:
+            print("You need to create an admin account to use the ABA.")
+        username = input("Choose a username for the admin account: ")
+        Authentication.first_admin(username)
+
+        if len(userInput) == 3:
+            database.login(userInput[1], userInput[2])
         print("L")
 
     elif(command_List.get(userInput[0]) == 3):
@@ -173,4 +181,7 @@ def ABA():
 
 
 if __name__ == "__main__":
+    if type(database) != Authentication:
+        database = Authentication()
+    
     ABA()

@@ -13,8 +13,8 @@ class Authentication:
         self.password_dict = {} # temporary non-security driven storage for passwords; will be changed upon further implementation
         self.active_user == 0 # 0 = no active user
     
-    def first_admin(self):
-        username = self.check_username()
+    def first_admin(self,userID):
+        username = self.check_username(userID)
         password = self.create_password() # still need to implement a hash/encryption method for storing passwords
         init_account = Inputs(username,password,self)
         self.password_dict[username] = password
@@ -40,23 +40,22 @@ class Authentication:
                 self.dictionary[username].add_log(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
                 print("OK")
     
-    def check_username(self):
-        print("Create a unique userID containing 1-16 characters composed of upper- or -lowercase letters, or numbers.\n")
+    def check_username(self,entry):
         username = ""
         while username == "":
-            username = input("Enter valid userID: ")
-            if len(username) > 16 or len(username) < 1:
+            if len(entry) > 16 or len(entry) < 1:
                 print("UserID contains invalid number of characters.\n")
-                self.check_username()
+                entry = input("Please enter a new userID: ")
             else:
                 reg = "[A-Za-z0-9*]"
                 pat = re.compile(reg)
-                mat = re.search(pat,username)
+                mat = re.search(pat,entry)
                 if mat:
+                    username = entry
                     for account in self.dictionary:
-                        if account == username:
+                        if account == entry:
                             print("This userID is already taken.\n")
-                            self.check_username()
+                            entry = input("Please enter a new userID: ")
         return username
 
 
