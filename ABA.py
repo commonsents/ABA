@@ -39,9 +39,9 @@ def chooseResponse(userInput):
         #if len(userInput)> 1:
         #   LIN(userInput[1])
         if len(database.dictionary) == 0:
-            print("You need to create an admin account to use the ABA.")
+            print("You need to create an admin account to use the ABA.\n")
         username = input("Choose a username for the admin account: ")
-        Authentication.first_admin(username)
+        database.first_admin(username)
 
         if len(userInput) == 3:
             database.login(userInput[1], userInput[2])
@@ -67,6 +67,8 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 6):
         #CHP()
+        old_password = input("Please enter the current password associated with this userID: ")
+        database.change_password(old_password)
         quit()
 
     elif(command_List.get(userInput[0]) == 7):
@@ -181,6 +183,7 @@ def ABA():
 
 
 if __name__ == "__main__":
+    database = Authentication()
     if type(database) != Authentication:
         database = Authentication()
     

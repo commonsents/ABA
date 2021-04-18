@@ -40,6 +40,28 @@ class Authentication:
                 self.dictionary[username].add_log(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
                 print("OK")
     
+    def logout(self):
+        if self.active_user == 0:
+            print("There is currently no active login session.\n")
+        else:
+            print("OK")
+            self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", LO, " + self.active_user.username)
+            self.active_user = 0
+    
+
+    def change_password(self, old_password):
+        # check that the user knows the password before changing it
+        if self.active_user == 0:
+            print("There is currently no active login session.\n")
+        elif self.password_dict[self.active_user] !=  old_password:
+            print("Invalid credentials")
+            self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
+        else:
+            new_password = self.create_password()
+            self.password_dict[self.active_user] = new_password
+            self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
+            print("OK")
+
     def check_username(self,entry):
         username = ""
         while username == "":
@@ -61,7 +83,7 @@ class Authentication:
 
     def create_password(self):
         # call this function when a new user account is created to verify their password input
-        print("This is the first time the account is being used. You must create a new password. Passwords may contain 1-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
+        print("You must create a new password. Passwords may contain 1-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
         password = ""
         while password == "":
             password = input("Please enter a valid password: ")
