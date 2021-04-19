@@ -11,7 +11,7 @@ class Inputs:
         self.admin = False
         self.log = []
 
-    def log_max(self,logentry):
+    def log_entry(self,logentry):
         if len(self.log) == 512:
             del self.log[0]
             self.log.append(logentry)

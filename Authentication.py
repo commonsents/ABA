@@ -21,89 +21,95 @@ class Authentication:
         self.dictionary[username] = init_account
         self.dictionary[username].admin = True
         self.active_user = self.dictionary[username]
-        self.dictionary[username].add_log(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
-        self.dictionary[username].add_log(str(datetime.datetime.now()) + ", L1, " + username)
-        self.dictionary[username].add_log(str(datetime.datetime.now()) + ", LS, " + username)
+        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
+        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
+        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
+        print("Welcome, " + self.active_user.username + " is now logged in.\n")
 
 
-    def login(self, username, password):
+    def login(self, username):
         # check if there is an active user
         if self.active_user != 0:
-            print("An account is currently active; logout before proceeding.\n")
+            print("\nAn account is currently active; logout before proceeding.\n")
         else:
+            password = input("\nEnter your password: ")
             if not self.validate_creds(username,password):
-                print("Invalid credentials.\n")
+                print("\nInvalid credentials.\n")
                 if username in self.dictionary:
-                    self.dictionary[username].add_log(str(datetime.datetime.now()) + ", LF, " + username)
+                    self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LF, " + username)
             else:
                 self.active_user = self.dictionary[username]
-                self.dictionary[username].add_log(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
-                print("OK")
+                self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
+                print("\nOK\n")
+                print("Login Successful")
     
     def logout(self):
         if self.active_user == 0:
-            print("There is currently no active login session.\n")
+            print("\nThere is currently no active login session.\n")
         else:
-            print("OK")
-            self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", LO, " + self.active_user.username)
+            print("\nOK\n")
+            self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", LO, " + self.active_user.username)
             self.active_user = 0
+            print("Logout successful. See you next time!\n")
     
 
     def change_password(self, old_password):
         # check that the user knows the password before changing it
-        if self.active_user == 0:
-            print("There is currently no active login session.\n")
-        elif self.password_dict[self.active_user.username] !=  old_password:
-            print("Invalid credentials")
-            self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
-        else:
-            new_password = self.create_password()
-            self.password_dict[self.active_user.username] = new_password
-            self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
-            print("OK")
+            if self.active_user == 0:
+                print("\nThere is currently no active login session.\n")
+            elif self.password_dict[self.active_user.username] !=  old_password:
+                print("\nInvalid credentials.\n")
+                self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
+            else:
+                new_password = self.create_password()
+                self.password_dict[self.active_user.username] = new_password
+                self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
+                print("Password successfully changed.\n")
+    
 
     def check_username(self,entry):
         username = ""
         while username == "":
             if len(entry) > 16 or len(entry) < 1:
-                print("UserID contains invalid number of characters.\n")
-                entry = input("Please enter a new userID: ")
+                print("\nUserID contains invalid number of characters.\n")
+                entry = input("\nPlease enter a new userID: ")
+                username = ""
             else:
-                reg = "[A-Za-z0-9*]"
-                pat = re.compile(reg)
-                mat = re.search(pat,entry)
+                mat = re.fullmatch('[A-Za-z0-9]*', entry)
                 if mat:
                     username = entry
                     for account in self.dictionary:
                         if account == entry:
-                            print("This userID is already taken.\n")
-                            entry = input("Please enter a new userID: ")
+                            print("\nThis userID is already taken.")
+                            entry = input("\nPlease enter a new userID: ")
+                            username = ""
+                else:
+                    print("\nUserID contains illegal characters.")
+                    entry = input("\nPlease enter a new userID: ")
+                    username = ""
         return username
 
 
     def create_password(self):
         # call this function when a new user account is created to verify their password input
-        print("You must create a new password. Passwords may contain 1-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
+        print("\nCreate a new password. Passwords may contain 1-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
         password = ""
         while password == "":
             password = input("Please enter a valid password: ")
             if len(password) > 24 or len(password) < 1:
-                print("Password contains invalid number of characters.\n")
+                print("\nPassword contains invalid number of characters.\n")
                 self.create_password()
-            #checking password validation
-            reg = "[A-Za-z0-9*]"
-            pat = re.compile(reg)
-            mat = re.search(pat,password)
+            mat = re.fullmatch('[A-Za-z0-9]*', password)
             if mat:
-                password1 = input("Reenter the same password: ")
+                password1 = input("\nReenter the same password: ")
                 if (password == password1):
-                    print("OK")
+                    print("\nOK\n")
                     return password
                 else:
-                    print("Passwords do not match\n")
+                    print("\nPasswords do not match.")
                     self.create_password()
             else:
-                print("Password contains illegal characters\n")
+                print("\nPassword contains illegal characters.")
                 self.create_password()
                     
 
@@ -111,6 +117,6 @@ class Authentication:
     def validate_creds(self,username,password):
         # verify userID is in the dictionary and return index if true and -1 if not found
         if username in self.dictionary:
-            return self.password_dict[self.dictionary[username]]
+            return self.password_dict[username]
         else:
             return False
