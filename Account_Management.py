@@ -17,7 +17,7 @@ class Account_Management:
         elif type(self.active_user) == Account and self.active_user.admin:
             username = self.choose_name(username)
             password = self.choose_password()
-            passwordHash = pbkdf2_sha256.hash(password)     #storing a salted hash of the password but not sure if this works properly yet
+            passwordHash = pbkdf2_sha256.hash(password)     #storing a salted hash of the password
             new_account = Account(username, passwordHash, self)
             self.dictionary[username] = new_account
             self.active_user = self.dictionary[username]  # user is logged in
