@@ -45,7 +45,6 @@ def chooseResponse(userInput):
 
         if len(userInput) == 3:
             database.login(userInput[1], userInput[2])
-        print("L")
 
     elif(command_List.get(userInput[0]) == 3):
         #Logout Command
@@ -63,7 +62,7 @@ def chooseResponse(userInput):
         if len(userInput)>1:
             IMD(userInput[1])
         else:
-            print("Please enter a file name following the command.")
+            print("No Input_File specified.")
 
     elif(command_List.get(userInput[0]) == 6):
         #CHP()
@@ -88,6 +87,8 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 11):
         #ADR
+        #Addrecord function
+        #ADR(userInput)
         quit()
 
     elif(command_List.get(userInput[0]) == 12):
@@ -104,7 +105,8 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 15):
         #EXD
-        quit()
+        
+        EXD(userInput)
 
     else:
         print("Command not found. Type \"HLP\" for a list of commands.")
@@ -167,6 +169,20 @@ def IMD(filename):
             compiled_addr_book.append(new_entry)
     print("Address Book Import Complete.")
 
+"""def ADR(userInput):
+    validEntry = []
+    for x in range(1,len(userInput)):
+
+    new_entry = Account_Entry(validEntry[0],validEntry[1],validEntry[2],validEntry[3],validEntry[4],validEntry[5],validEntry[6],validEntry[7],validEntry[8],validEntry[9],validEntry[10],validEntry[11])
+"""
+
+def EXD(userInput):
+    f = open(userInput[1]+ ".csv", "w+")
+    outString = ""
+    for x in compiled_addr_book:
+        outString += x.recordID + "," + x.SN + "," + x.GN + "," + x.PEM + "," + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
+        f.write(outString)
+        outString = ""
 
 
 
@@ -185,5 +201,4 @@ if __name__ == "__main__":
     database = Authentication()
     if type(database) != Authentication:
         database = Authentication()
-    
     ABA()
