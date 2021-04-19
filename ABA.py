@@ -4,8 +4,11 @@
 # Description: Implementation of Address Book Appliance
 import sys
 import csv
+import pickle 
+import os.path
+from os import path
 from Account_Entry import *
-from Authentication import Authentication
+from Authentication import *
 
 version_Num = "1.1"
 command_List = {"HLP": 1, "LIN": 2, "LOU": 3, "EXT": 4, "IMD": 5, "CHP": 6, "ADU": 7, "DEU": 8, "LSU": 9, "DAL": 10, "ADR": 11, "DER": 12, "EDR": 13, "RER": 14, "EXD": 15}
@@ -38,19 +41,19 @@ def chooseResponse(userInput):
 
         #if len(userInput)> 1:
         #   LIN(userInput[1])
-        if len(database.dictionary) == 0:
-            print("You need to create an admin account to use the ABA.\n")
-        username = input("Choose a username for the admin account: ")
-        database.first_admin(username)
-
-        if len(userInput) == 3:
-            database.login(userInput[1], userInput[2])
-        print("L")
+        if len(userInput) > 1:
+            database.login(userInput[1])
+        else:
+            print("\nPlease specify userID.\n")
+            ABA()
+        #print("L")
 
     elif(command_List.get(userInput[0]) == 3):
         #Logout Command
         #LOU()
-        print("LO")
+        if len(userInput) == 1:
+            database.logout()
+        #print("LO")
 
     elif(command_List.get(userInput[0]) == 4):
         #EXT Command
@@ -67,7 +70,7 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 6):
         #CHP()
-        old_password = input("Please enter the current password associated with this userID: ")
+        old_password = userInput[1]
         database.change_password(old_password)
 
     elif(command_List.get(userInput[0]) == 7):
@@ -113,7 +116,7 @@ def chooseResponse(userInput):
 
 def help(cmd = ""):
     if cmd == "":
-        print("Login: LIN <userID> <password>\n"
+        print("Login: LIN <userID>\n"
               "Logout: LOU\n"
               "Change Password: CHP <old password>\n"
               "Add User: ADU <userID>\n"
@@ -128,7 +131,7 @@ def help(cmd = ""):
               "Help: HLP [<command name>]\n"
               "Exit: EXT\n")
     elif cmd == "LIN":
-        print("Login: LIN <userID> <password>\n")
+        print("Login: LIN <userID>\n")
     elif cmd == "LOU":
         print("Logout: LOU\n")
     elif cmd == "CHP":
@@ -178,12 +181,23 @@ def ABA():
             input1 = str.split(input1)
             chooseResponse(input1)
         else:
-            print("Please enter a command.")
+            print("\nPlease enter a command.\n")
 
 
 if __name__ == "__main__":
     database = Authentication()
+    if path.isfile('DatabaseStorage') == True:
+        try:
+            storageFile = open('DatabaseStorage', 'rb')
+            database = pickle.load(storageFile)
+        except pickle.PickleError:
+            None
     if type(database) != Authentication:
         database = Authentication()
+    if len(database.dictionary) == 0:
+        print("You need to create an admin account to use the ABA.")
+        print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
+        username = input("Choose a username for the admin account: ")
+        database.first_admin(username)
     
     ABA()
