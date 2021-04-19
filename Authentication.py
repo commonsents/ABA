@@ -11,7 +11,7 @@ class Authentication:
     def __init__(self):
         self.dictionary = {} # dictionary to map usernames to accounts
         self.password_dict = {} # temporary non-security driven storage for passwords; will be changed upon further implementation
-        self.active_user == 0 # 0 = no active user
+        self.active_user = 0 # 0 = no active user
     
     def first_admin(self,userID):
         username = self.check_username(userID)
@@ -53,12 +53,12 @@ class Authentication:
         # check that the user knows the password before changing it
         if self.active_user == 0:
             print("There is currently no active login session.\n")
-        elif self.password_dict[self.active_user] !=  old_password:
+        elif self.password_dict[self.active_user.username] !=  old_password:
             print("Invalid credentials")
             self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
         else:
             new_password = self.create_password()
-            self.password_dict[self.active_user] = new_password
+            self.password_dict[self.active_user.username] = new_password
             self.dictionary[self.active_user.username].add_log(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
             print("OK")
 
