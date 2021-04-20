@@ -160,3 +160,9 @@ class Authentication:
 
         else:
             print("\nUser " + username + " does not exist\n")
+
+    def list_users(self):
+        username = 0
+        for username in self.dictionary:
+            print("\n" + self.dictionary[username] +"\n")
+            username += 1
