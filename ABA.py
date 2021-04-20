@@ -92,12 +92,11 @@ def chooseResponse(userInput):
     elif(command_List.get(userInput[0]) == 11):
         #ADR
         #Addrecord function
-        #ADR(userInput)
-        quit()
+        ADR(userInput)
 
     elif(command_List.get(userInput[0]) == 12):
         #DER
-        quit()
+        DER(userInput)
         
     elif(command_List.get(userInput[0]) == 13):
         #EDR
@@ -109,8 +108,10 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 15):
         #EXD
-        
-        EXD(userInput)
+        if len(userInput)>1:
+            EXD(userInput)
+        else:
+            print("No Input_file specified")
 
     else:
         print("Command not found. Type \"HLP\" for a list of commands.")
@@ -173,18 +174,35 @@ def IMD(filename):
             compiled_addr_book.append(new_entry)
     print("Address Book Import Complete.")
 
-"""def ADR(userInput):
-    validEntry = []
-    for x in range(1,len(userInput)):
 
-    new_entry = Account_Entry(validEntry[0],validEntry[1],validEntry[2],validEntry[3],validEntry[4],validEntry[5],validEntry[6],validEntry[7],validEntry[8],validEntry[9],validEntry[10],validEntry[11])
-"""
+def ADR(userInput):
+    val = {"recordID": 0, "SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
+    account_items = [userInput[1],"","","","","","","","","","",""]
+    for x in range(2,len(userInput)):
+        #Should have strings in format value=newval
+        nextVal = userInput[x].split("=")
+        if nextVal[0] in val:
+            account_items[val.get(nextVal[0])] = nextVal[1]
+    new_entry = Account_Entry(account_items[0],account_items[1],account_items[2],account_items[3],account_items[4],account_items[5],account_items[6],account_items[7],account_items[8],account_items[9],account_items[10],account_items[11])
+    compiled_addr_book.append(new_entry)
 
+
+def DER(userInput):
+    for x in range(len(compiled_addr_book)):
+        if userInput[1] == compiled_addr_book[x].recordID:
+            compiled_addr_book.remove(compiled_addr_book[x])
+            print("Item Deleted!")
+
+def EDR(userInput):
+    quit()
+
+    
 def EXD(userInput):
     f = open(userInput[1]+ ".csv", "w+")
     outString = ""
     for x in compiled_addr_book:
-        outString += x.recordID + "," + x.SN + "," + x.GN + "," + x.PEM + "," + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
+        outString += x.recordID + "," + x.SN + "," + x.GN + "," + x.PEM + "," \
+            + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
         f.write(outString)
         outString = ""
 
