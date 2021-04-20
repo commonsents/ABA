@@ -46,3 +46,4 @@ class Account_Management:
 
     def list_users(self):
         #still need to figure out a way to access the database we are using in order to list all usernames
+        quit()
