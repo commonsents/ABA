@@ -41,7 +41,7 @@ class Authentication:
                 self.active_user = self.dictionary[username]
                 self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
                 print("\nOK\n")
-                print("Login Successful")
+                print("Login Successful\n")
     
     def logout(self):
         if self.active_user == 0:
@@ -62,6 +62,9 @@ class Authentication:
                 self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
             else:
                 new_password = self.create_password()
+                if new_password == old_password:
+                    print("New password must be different from previous password.\n")
+                    new_password = self.create_password()
                 self.password_dict[self.active_user.username] = new_password
                 self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
                 print("Password successfully changed.\n")
@@ -98,25 +101,62 @@ class Authentication:
             password = input("Please enter a valid password: ")
             if len(password) > 24 or len(password) < 1:
                 print("\nPassword contains invalid number of characters.\n")
-                self.create_password()
-            mat = re.fullmatch('[A-Za-z0-9]*', password)
-            if mat:
-                password1 = input("\nReenter the same password: ")
-                if (password == password1):
-                    print("\nOK\n")
-                    return password
-                else:
-                    print("\nPasswords do not match.")
-                    self.create_password()
+                password = ""
             else:
-                print("\nPassword contains illegal characters.")
-                self.create_password()
-                    
+                mat = re.fullmatch('[A-Za-z0-9]+', password)
+                if mat:
+                    password1 = input("\nReenter the same password: ")
+                    if (password == password1):
+                        print("\nOK\n")
+                        return password
+                    else:
+                        print("\nPasswords do not match.\n")
+                        password = ""
+                else:
+                    print("\nPassword contains illegal characters.\n")
+                    password = ""
+                        
 
 
     def validate_creds(self,username,password):
         # verify userID is in the dictionary and return index if true and -1 if not found
         if username in self.dictionary:
-            return self.password_dict[username]
+            if self.password_dict[username] == password:
+                return self.password_dict[username]
         else:
             return False
+    
+
+    def add_user(self, username):
+        if len(self.dictionary) == 8:
+            print("Maximum amount of users reached. You cannot any add more users until at least one is deleted")
+        elif type(self.active_user) == Inputs and self.active_user.admin:
+            username = self.check_username(username)
+            password = self.create_password()
+            init_account = Inputs(username, password, self)
+            self.password_dict[username] = password
+            self.dictionary[username] = init_account
+            self.active_user = self.dictionary[username]  # user is logged in
+            print("Active user now is : " + username + "\n")
+            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
+            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
+            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
+        else:
+            print("\nAdmin account must be active\n")
+
+    # Only admin can delete user accounts
+    def delete_user(self, username):
+        if self.active_user == 0:
+            print("\nAdmin account must be active\n")
+        elif not self.active_user.admin:
+            print("\nAdmin account must be active\n")
+        elif username in self.dictionary and type(self.active_user) == Inputs and self.active_user.admin:
+            if self.active_user.username == username:
+                print("\nAn admin account cannot delete itself\n")
+            else:
+                del self.dictionary[username]
+                self.active_user.log_entry(str(datetime.datetime.now()) + ", DU, " + self.active_user.username)
+                print("\nOK, user successfully deleted\n")
+
+        else:
+            print("\nUser " + username + " does not exist\n")

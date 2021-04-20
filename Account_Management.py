@@ -3,9 +3,10 @@
 # Date: 4/18/21
 # Description: Add User, Delete User, and List Users commands handled
 #from passlib.hash import pbkdf2_sha256 # from the passlib library. download with "pip install passlib" in terminal
-import datetime
+"""import datetime
 import re
 from Inputs import *
+from Authentication import *
 
 
 class Account_Management:
@@ -15,16 +16,17 @@ class Account_Management:
         if len(self.dictionary) == 8:
             print("Maximum amount of users reached. You cannot any add more users until at least one is deleted")
         elif type(self.active_user) == Account and self.active_user.admin:
-            username = self.choose_name(username)
-            password = self.choose_password()
-            passwordHash = pbkdf2_sha256.hash(password)     #storing a salted hash of the password
-            new_account = Account(username, passwordHash, self)
+            username = self.check_username(username)
+            password = self.create_password()
+            init_account = Inputs(username, password, self)
+            self.password_dict[username] = password
+            #passwordHash = pbkdf2_sha256.hash(password)     #storing a salted hash of the password
             self.dictionary[username] = new_account
             self.active_user = self.dictionary[username]  # user is logged in
             print("Active user now is : " + username)
-            self.dictionary[username].add_log(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
-            self.dictionary[username].add_log(str(datetime.datetime.now()) + ", L1, " + username)
-            self.dictionary[username].add_log(str(datetime.datetime.now()) + ", LS, " + username)
+            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
+            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
+            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
         else:
             print("Admin account must be active")
 
@@ -34,15 +36,16 @@ class Account_Management:
             print("Admin account must be active")
         elif not self.active_user.admin:
             print("Admin account must be active")
-        elif username in self.dictionary and type(self.active_user) == Account and self.active_user.admin:
+        elif username in self.dictionary and type(self.active_user) == Inputs and self.active_user.admin:
             if self.active_user.username == username:
                 print("An admin account cannot delete itself")
             else:
                 del self.dictionary[username]
-                self.active_user.add_log(str(datetime.datetime.now()) + ", DU, " + self.active_user.username)
+                self.active_user.log_entry(str(datetime.datetime.now()) + ", DU, " + self.active_user.username)
                 print("OK")
         else:
             print("User " + username + " does not exist")
 
-    def list_users(self):
+    #def list_users(self):
         #still need to figure out a way to access the database we are using in order to list all usernames
+        """

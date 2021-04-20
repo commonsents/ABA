@@ -42,17 +42,18 @@ def chooseResponse(userInput):
         #if len(userInput)> 1:
         #   LIN(userInput[1])
         if len(userInput) > 1:
-            database.login(userInput[1])
+            authenticate.login(userInput[1])
         else:
             print("\nPlease specify userID.\n")
             ABA()
-        #print("L")
 
     elif(command_List.get(userInput[0]) == 3):
         #Logout Command
         #LOU()
         if len(userInput) == 1:
-            database.logout()
+            authenticate.logout()
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
         #print("LO")
 
     elif(command_List.get(userInput[0]) == 4):
@@ -70,16 +71,24 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 6):
         #CHP()
-        old_password = userInput[1]
-        database.change_password(old_password)
+        if len(userInput) == 2:
+            authenticate.change_password(userInput[1])
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
 
     elif(command_List.get(userInput[0]) == 7):
         #ADU()
-        quit()
-
+        if len(userInput) == 2:
+            authenticate.add_user(userInput[1])
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
+        
     elif(command_List.get(userInput[0]) == 8):
         #DEU()
-        quit()
+        if len(userInput) == 2:
+            authenticate.delete_user(userInput[1])
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
 
     elif(command_List.get(userInput[0]) == 9):
         #LSU()
@@ -121,6 +130,7 @@ def help(cmd = ""):
               "Change Password: CHP <old password>\n"
               "Add User: ADU <userID>\n"
               "Delete User: DEU <userID>\n"
+              "List Users: LSU \n"
               "Display Audit Log: DAL [<userID>]\n"
               "Add Record: ADR <recordID> [<field1=value1> <field2=value2> ...]\n"
               "Delete Record: DER <recordID>\n"
@@ -185,19 +195,19 @@ def ABA():
 
 
 if __name__ == "__main__":
-    database = Authentication()
+    authenticate = Authentication()
     if path.isfile('DatabaseStorage') == True:
         try:
             storageFile = open('DatabaseStorage', 'rb')
-            database = pickle.load(storageFile)
+            authenticate = pickle.load(storageFile)
         except pickle.PickleError:
             None
-    if type(database) != Authentication:
-        database = Authentication()
-    if len(database.dictionary) == 0:
+    if type(authenticate) != Authentication:
+        authenticate = Authentication()
+    if len(authenticate.dictionary) == 0:
         print("You need to create an admin account to use the ABA.")
         print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
         username = input("Choose a username for the admin account: ")
-        database.first_admin(username)
+        authenticate.first_admin(username)
     
     ABA()
