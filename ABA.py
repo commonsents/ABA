@@ -100,7 +100,7 @@ def chooseResponse(userInput):
         
     elif(command_List.get(userInput[0]) == 13):
         #EDR
-        quit()
+        EDR(userInput)
 
     elif(command_List.get(userInput[0]) == 14):
         #RER
@@ -176,7 +176,7 @@ def IMD(filename):
 
 
 def ADR(userInput):
-    val = {"recordID": 0, "SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
+    val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
     account_items = [userInput[1],"","","","","","","","","","",""]
     for x in range(2,len(userInput)):
         #Should have strings in format value=newval
@@ -185,18 +185,33 @@ def ADR(userInput):
             account_items[val.get(nextVal[0])] = nextVal[1]
     new_entry = Account_Entry(account_items[0],account_items[1],account_items[2],account_items[3],account_items[4],account_items[5],account_items[6],account_items[7],account_items[8],account_items[9],account_items[10],account_items[11])
     compiled_addr_book.append(new_entry)
+    print("OK")
+    return()
 
 
 def DER(userInput):
     for x in range(len(compiled_addr_book)):
         if userInput[1] == compiled_addr_book[x].recordID:
             compiled_addr_book.remove(compiled_addr_book[x])
-            print("Item Deleted!")
+            print("OK")
+            return()
 
 def EDR(userInput):
-    quit()
+    val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
+    for x in range(len(compiled_addr_book)):
+        if userInput[1] == compiled_addr_book[x].recordID:
+            for y in range(2, len(userInput)):
+                nextVal = userInput[y].split("=")
+                if nextVal[0] in val:
+                    print(nextVal[0] + " " + nextVal[1])
+                    print(compiled_addr_book[x].GN)
+                    setattr(compiled_addr_book[x], nextVal[0], nextVal[1])
+                    print(compiled_addr_book[x].GN)
+                    print("OK")
+                    return()
 
-    
+
+
 def EXD(userInput):
     f = open(userInput[1]+ ".csv", "w+")
     outString = ""
@@ -205,6 +220,8 @@ def EXD(userInput):
             + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
         f.write(outString)
         outString = ""
+    print("OK")
+    return()
 
 
 
