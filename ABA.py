@@ -92,7 +92,10 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 9):
         #LSU()
-        quit()
+        if len(userInput) == 2:
+            authenticate.list_users(userInput[1])
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
 
     elif(command_List.get(userInput[0]) == 10):
         #DAL
