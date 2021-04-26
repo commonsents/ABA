@@ -3,8 +3,7 @@
 # Date: 
 # Description: Implementation of Address Book Appliance
 import sys
-import csv
-import pickle 
+import csv 
 import os.path
 from os import path
 from Account_Entry import *
@@ -92,8 +91,8 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 9):
         #LSU()
-        if len(userInput) == 2:
-            authenticate.list_users(userInput[1])
+        if len(userInput) == 1:
+            authenticate.list_users()
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
 
@@ -174,7 +173,7 @@ def help(cmd = ""):
     elif cmd == "EXT":
         print("Exit: EXT\n")
     else:
-        print("no such instructions exists.")
+        print("No such instructions exists.")
 
 
 
@@ -244,7 +243,7 @@ def EXD(userInput):
 
 
 def ABA():
-    print("Address Book Application, version ", version_Num, ". Type \"HLP\" for a list of commands.")
+    print("Address Book Application, version ", version_Num, ". Type \"HLP\" for a list of commands.\n")       
     while(True):
         input1 = str(input())
         if(input1 != ""):
@@ -256,18 +255,17 @@ def ABA():
 
 if __name__ == "__main__":
     authenticate = Authentication()
-    if path.isfile('DatabaseStorage') == True:
-        try:
-            storageFile = open('DatabaseStorage', 'rb')
-            authenticate = pickle.load(storageFile)
-        except pickle.PickleError:
-            None
+    with open('permissions.csv','r') as user_info:
+        #user_info = csv.reader(user_info)
+        user_info.seek(0, os.SEEK_END) # go to end of file
+        if user_info.tell(): # if current position is truish (i.e != 0)
+            user_info.seek(0) # rewind the file for later use 
+        else:
+            print("\nYou need to create an admin account to use the ABA.")
+            print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
+            username = input("Choose a username for the admin account: ")
+            authenticate.first_admin(username)
     if type(authenticate) != Authentication:
         authenticate = Authentication()
-    if len(authenticate.dictionary) == 0:
-        print("You need to create an admin account to use the ABA.")
-        print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
-        username = input("Choose a username for the admin account: ")
-        authenticate.first_admin(username)
     
     ABA()
