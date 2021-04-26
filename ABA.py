@@ -20,7 +20,7 @@ address_book_file = "testDB.csv"
 admin = "0"
 
 #Format = recordID:Data, ...
-compiled_addr_book = []
+compiled_addr_book = {}
 
 
 #Command that chooses which response to take based on input received from user. 
@@ -184,55 +184,60 @@ def IMD(filename):
         data = csv.reader(f)
         for row in data:
             new_entry = Account_Entry(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11])
-            compiled_addr_book.append(new_entry)
+            compiled_addr_book.update({row[0]:new_entry})
     print("Address Book Import Complete.")
 
 
 def ADR(userInput):
     val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
     account_items = [userInput[1],"","","","","","","","","","",""]
-    for x in range(2,len(userInput)):
+    if userInput[1] in compiled_addr_book:
+        print("There is already a record with this ID. Please choose another.")
+        return()
+    else:
+        for x in range(2,len(userInput)):
         #Should have strings in format value=newval
-        nextVal = userInput[x].split("=")
-        if nextVal[0] in val:
-            account_items[val.get(nextVal[0])] = nextVal[1]
-    new_entry = Account_Entry(account_items[0],account_items[1],account_items[2],account_items[3],account_items[4],account_items[5],account_items[6],account_items[7],account_items[8],account_items[9],account_items[10],account_items[11])
-    compiled_addr_book.append(new_entry)
-    print("OK")
-    return()
+            nextVal = userInput[x].split("=")
+            if nextVal[0] in val:
+                account_items[val.get(nextVal[0])] = nextVal[1]
+        new_entry = Account_Entry(account_items[0],account_items[1],account_items[2],account_items[3],account_items[4],account_items[5],account_items[6],account_items[7],account_items[8],account_items[9],account_items[10],account_items[11])
+        compiled_addr_book.update({account_items[0]:new_entry})
+        print("OK")
+        return()
 
 
 def DER(userInput):
-    for x in range(len(compiled_addr_book)):
-        if userInput[1] == compiled_addr_book[x].recordID:
-            compiled_addr_book.remove(compiled_addr_book[x])
-            print("OK")
-            return()
+    if userInput[1] in compiled_addr_book.keys():
+        compiled_addr_book.pop(userInput[1])
+        print("OK")
+        return()
+
+
 
 def EDR(userInput):
     val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
-    for x in range(len(compiled_addr_book)):
-        if userInput[1] == compiled_addr_book[x].recordID:
-            for y in range(2, len(userInput)):
-                nextVal = userInput[y].split("=")
-                if nextVal[0] in val:
-                    print(nextVal[0] + " " + nextVal[1])
-                    print(compiled_addr_book[x].GN)
-                    setattr(compiled_addr_book[x], nextVal[0], nextVal[1])
-                    print(compiled_addr_book[x].GN)
-                    print("OK")
-                    return()
+    if userInput[1] in compiled_addr_book.keys():
+        updateItem = compiled_addr_book.get(userInput[1])
+        for y in range(2, len(userInput)):
+            nextVal = userInput[y].split("=")
+            if nextVal[0] in val:
+                print(nextVal[0] + " " + nextVal[1])
+                print(updateItem.GN)
+                setattr(updateItem, nextVal[0], nextVal[1])
+                print(updateItem.GN)
+                print("OK")
+                return()
 
 
 
 def EXD(userInput):
     f = open(userInput[1]+ ".csv", "w+")
     outString = ""
-    for x in compiled_addr_book:
+    for key in compiled_addr_book.keys():
+        x = compiled_addr_book.get(key)
         outString += x.recordID + "," + x.SN + "," + x.GN + "," + x.PEM + "," \
             + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
-        f.write(outString)
-        outString = ""
+    f.write(outString)
     print("OK")
     return()
 
