@@ -25,12 +25,31 @@ class Authentication:
         self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
         self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
         print("Welcome, " + self.active_user.username + " is now logged in.\n")
+        data = open('permissions.csv', 'w')
+        info = ""
+        info += username + "," + password + "\n"
+        data.write(info)
+        data.close()
+
+        
+    def first_login(self,username):
+        print("\nThis is the first time this account is being used. You must create a new password.\n")
+        password = self.create_password()
+        full_account = Inputs(username, password, self) # update the definition of the user to include the password associated with the userID to be stored
+        self.dictionary[username] = full_account
+        self.password_dict[username] = password
+        self.active_user = self.dictionary[username]
+        print("Active user now is : " + username + "\n")
+        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
+        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
 
 
     def login(self, username):
         # check if there is an active user
         if self.active_user != 0:
             print("\nAn account is currently active; logout before proceeding.\n")
+        elif username not in self.password_dict:
+            self.first_login(username)
         else:
             password = input("\nEnter your password: ")
             if not self.validate_creds(username,password):
@@ -41,7 +60,6 @@ class Authentication:
                 self.active_user = self.dictionary[username]
                 self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
                 print("\nOK\n")
-                print("Login Successful\n")
     
     def logout(self):
         if self.active_user == 0:
@@ -61,6 +79,7 @@ class Authentication:
                 print("\nInvalid credentials.\n")
                 self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
             else:
+                print("\nCreate a new password.")
                 new_password = self.create_password()
                 if new_password == old_password:
                     print("New password must be different from previous password.\n")
@@ -95,11 +114,11 @@ class Authentication:
 
     def create_password(self):
         # call this function when a new user account is created to verify their password input
-        print("\nCreate a new password. Passwords may contain 1-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
+        print("\nPasswords may contain 8-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
         password = ""
         while password == "":
             password = input("Please enter a valid password: ")
-            if len(password) > 24 or len(password) < 1:
+            if len(password) > 24 or len(password) < 8:
                 print("\nPassword contains invalid number of characters.\n")
                 password = ""
             else:
@@ -129,18 +148,13 @@ class Authentication:
 
     def add_user(self, username):
         if len(self.dictionary) == 8:
-            print("Maximum amount of users reached. You cannot any add more users until at least one is deleted")
+            print("\nMaximum amount of users reached. You cannot any add more users until at least one is deleted\n")
         elif type(self.active_user) == Inputs and self.active_user.admin:
             username = self.check_username(username)
-            password = self.create_password()
-            init_account = Inputs(username, password, self)
-            self.password_dict[username] = password
+            init_account = Inputs(username, None, self)
             self.dictionary[username] = init_account
-            self.active_user = self.dictionary[username]  # user is logged in
-            print("Active user now is : " + username + "\n")
+            print("\nOK\n")
             self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
-            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
-            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
         else:
             print("\nAdmin account must be active\n")
 
@@ -162,7 +176,11 @@ class Authentication:
             print("\nUser " + username + " does not exist\n")
 
     def list_users(self):
-        username = 0
-        for username in self.dictionary:
-            print("\n" + self.dictionary[username] +"\n")
-            username += 1
+        if self.active_user == 0:
+            print("\nThere is currently no active login session.\n")
+        elif not self.active_user.admin:
+            print("\nAdmin account must be active\n")
+        else:
+            print("\nOK\n")
+            for i in self.dictionary:
+                print(self.dictionary.keys() +"\n")
