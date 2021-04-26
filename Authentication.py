@@ -185,4 +185,8 @@ class Authentication:
         else:
             print("\nOK\n")
             for i in self.dictionary:
+    <<<<<<< Updated upstream
                 print(self.dictionary.keys() +"\n")
+=======
+                print(self.dictionary.keys(i) +"\n")
+>>>>>>> Stashed changes
