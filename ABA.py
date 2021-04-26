@@ -5,9 +5,11 @@
 import sys
 import csv 
 import os.path
+import queue
 from os import path
 from Account_Entry import *
 from Authentication import *
+from AuditRecord import *
 
 version_Num = "1.1"
 command_List = {"HLP": 1, "LIN": 2, "LOU": 3, "EXT": 4, "IMD": 5, "CHP": 6, "ADU": 7, "DEU": 8, "LSU": 9, "DAL": 10, "ADR": 11, "DER": 12, "EDR": 13, "RER": 14, "EXD": 15}
@@ -19,7 +21,8 @@ address_book_file = "testDB.csv"
 admin = "0"
 
 #Format = recordID:Data, ...
-compiled_addr_book = []
+compiled_addr_book = {}
+cur_audit_log = queue.Queue(512)
 
 
 #Command that chooses which response to take based on input received from user. 
@@ -37,11 +40,9 @@ def chooseResponse(userInput):
     elif(command_List.get(userInput[0]) == 2):
         #Login Command
         #LIN(userID)
-
-        #if len(userInput)> 1:
-        #   LIN(userInput[1])
         if len(userInput) > 1:
             authenticate.login(userInput[1])
+            AddAuditRecord(cur_audit_log,"LS", authenticate.active_user)
         else:
             print("\nPlease specify userID.\n")
             ABA()
@@ -51,12 +52,14 @@ def chooseResponse(userInput):
         #LOU()
         if len(userInput) == 1:
             authenticate.logout()
+            AddAuditRecord(cur_audit_log, "LO", authenticate.active_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
         #print("LO")
 
     elif(command_List.get(userInput[0]) == 4):
         #EXT Command
+        SaveAuditLogs(cur_audit_log)
         print("Thank you for using ABA.")
         quit()
 
@@ -65,6 +68,7 @@ def chooseResponse(userInput):
         #Need to check for length on document
         if len(userInput)>1:
             IMD(userInput[1])
+            print("Address Book Import Complete.")
         else:
             print("No Input_File specified.")
 
@@ -72,7 +76,11 @@ def chooseResponse(userInput):
         #CHP()
         if len(userInput) == 2:
             authenticate.change_password(userInput[1])
+<<<<<<< HEAD
     
+=======
+            AddAuditRecord(cur_audit_log, "SPC", authenticate.user_id)
+>>>>>>> 4552b75cea48b36d25f1b629e0bde9ed0fde7201
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
 
@@ -80,6 +88,7 @@ def chooseResponse(userInput):
         #ADU()
         if len(userInput) == 2:
             authenticate.add_user(userInput[1])
+            AddAuditRecord(cur_audit_log, "AU", authenticate.user_id)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
         
@@ -87,6 +96,7 @@ def chooseResponse(userInput):
         #DEU()
         if len(userInput) == 2:
             authenticate.delete_user(userInput[1])
+            AddAuditRecord(cur_audit_log, "DU", authenticate.user_id)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
 
@@ -99,7 +109,8 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 10):
         #DAL
-        quit()
+        DisplayAuditLog(cur_audit_log)
+        print("OK")
 
     elif(command_List.get(userInput[0]) == 11):
         #ADR
@@ -184,69 +195,90 @@ def IMD(filename):
         data = csv.reader(f)
         for row in data:
             new_entry = Account_Entry(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11])
-            compiled_addr_book.append(new_entry)
-    print("Address Book Import Complete.")
+            compiled_addr_book.update({row[0]:new_entry})
+
 
 
 def ADR(userInput):
     val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
     account_items = [userInput[1],"","","","","","","","","","",""]
-    for x in range(2,len(userInput)):
+    if userInput[1] in compiled_addr_book:
+        print("There is already a record with this ID. Please choose another.")
+        return()
+    else:
+        for x in range(2,len(userInput)):
         #Should have strings in format value=newval
-        nextVal = userInput[x].split("=")
-        if nextVal[0] in val:
-            account_items[val.get(nextVal[0])] = nextVal[1]
-    new_entry = Account_Entry(account_items[0],account_items[1],account_items[2],account_items[3],account_items[4],account_items[5],account_items[6],account_items[7],account_items[8],account_items[9],account_items[10],account_items[11])
-    compiled_addr_book.append(new_entry)
-    print("OK")
-    return()
+            nextVal = userInput[x].split("=")
+            if nextVal[0] in val:
+                account_items[val.get(nextVal[0])] = nextVal[1]
+        new_entry = Account_Entry(account_items[0],account_items[1],account_items[2],account_items[3],account_items[4],account_items[5],account_items[6],account_items[7],account_items[8],account_items[9],account_items[10],account_items[11])
+        compiled_addr_book.update({account_items[0]:new_entry})
+        print("OK")
+        return()
 
 
 def DER(userInput):
-    for x in range(len(compiled_addr_book)):
-        if userInput[1] == compiled_addr_book[x].recordID:
-            compiled_addr_book.remove(compiled_addr_book[x])
-            print("OK")
-            return()
+    if userInput[1] in compiled_addr_book.keys():
+        compiled_addr_book.pop(userInput[1])
+        print("OK")
+        return()
+
+
 
 def EDR(userInput):
     val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
-    for x in range(len(compiled_addr_book)):
-        if userInput[1] == compiled_addr_book[x].recordID:
-            for y in range(2, len(userInput)):
-                nextVal = userInput[y].split("=")
-                if nextVal[0] in val:
-                    print(nextVal[0] + " " + nextVal[1])
-                    print(compiled_addr_book[x].GN)
-                    setattr(compiled_addr_book[x], nextVal[0], nextVal[1])
-                    print(compiled_addr_book[x].GN)
-                    print("OK")
-                    return()
+    if userInput[1] in compiled_addr_book.keys():
+        updateItem = compiled_addr_book.get(userInput[1])
+        for y in range(2, len(userInput)):
+            nextVal = userInput[y].split("=")
+            if nextVal[0] in val:
+                print(nextVal[0] + " " + nextVal[1])
+                print(updateItem.GN)
+                setattr(updateItem, nextVal[0], nextVal[1])
+                print(updateItem.GN)
+                print("OK")
+                return()
 
 
 
 def EXD(userInput):
     f = open(userInput[1]+ ".csv", "w+")
     outString = ""
-    for x in compiled_addr_book:
+    for key in compiled_addr_book.keys():
+        x = compiled_addr_book.get(key)
         outString += x.recordID + "," + x.SN + "," + x.GN + "," + x.PEM + "," \
             + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
-        f.write(outString)
-        outString = ""
+    f.write(outString)
     print("OK")
     return()
 
 
 
+
 def ABA():
+    if path.exists("AuditLogs.csv"):
+        ImportAuditLog("AuditLogs.csv", cur_audit_log)
+    else:
+        with open("AuditLogs.csv", "w") as fp:
+            pass
+        ImportAuditLog("AuditLogs.csv", cur_audit_log)
+
+    if path.exists("abadata.csv"):
+        IMD("abadata.csv")
+    else:
+        with open("auditrecord.csv", "w") as fp:
+            pass
+
     print("Address Book Application, version ", version_Num, ". Type \"HLP\" for a list of commands.\n")       
+
+
     while(True):
         input1 = str(input())
         if(input1 != ""):
             input1 = str.split(input1)
             chooseResponse(input1)
         else:
-            print("\nPlease enter a command.\n")
+            print("Please enter a command.\n")
 
 
 if __name__ == "__main__":
@@ -267,5 +299,4 @@ if __name__ == "__main__":
         authenticate.first_admin(username)
     if type(authenticate) != Authentication:
         authenticate = Authentication()
-    
     ABA()
