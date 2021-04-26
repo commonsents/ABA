@@ -5,9 +5,11 @@
 import sys
 import csv 
 import os.path
+import queue
 from os import path
 from Account_Entry import *
 from Authentication import *
+from AuditRecord import *
 
 version_Num = "1.1"
 command_List = {"HLP": 1, "LIN": 2, "LOU": 3, "EXT": 4, "IMD": 5, "CHP": 6, "ADU": 7, "DEU": 8, "LSU": 9, "DAL": 10, "ADR": 11, "DER": 12, "EDR": 13, "RER": 14, "EXD": 15}
@@ -20,6 +22,7 @@ admin = "0"
 
 #Format = recordID:Data, ...
 compiled_addr_book = {}
+cur_audit_log = queue.Queue(512)
 
 
 #Command that chooses which response to take based on input received from user. 
@@ -37,11 +40,9 @@ def chooseResponse(userInput):
     elif(command_List.get(userInput[0]) == 2):
         #Login Command
         #LIN(userID)
-
-        #if len(userInput)> 1:
-        #   LIN(userInput[1])
         if len(userInput) > 1:
             authenticate.login(userInput[1])
+            AddAuditRecord(cur_audit_log,"LS", authenticate.active_user)
         else:
             print("\nPlease specify userID.\n")
             ABA()
@@ -51,12 +52,14 @@ def chooseResponse(userInput):
         #LOU()
         if len(userInput) == 1:
             authenticate.logout()
+            AddAuditRecord(cur_audit_log, "LO", authenticate.active_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
         #print("LO")
 
     elif(command_List.get(userInput[0]) == 4):
         #EXT Command
+        SaveAuditLogs(cur_audit_log)
         print("Thank you for using ABA.")
         quit()
 
@@ -65,6 +68,7 @@ def chooseResponse(userInput):
         #Need to check for length on document
         if len(userInput)>1:
             IMD(userInput[1])
+            print("Address Book Import Complete.")
         else:
             print("No Input_File specified.")
 
@@ -72,6 +76,7 @@ def chooseResponse(userInput):
         #CHP()
         if len(userInput) == 2:
             authenticate.change_password(userInput[1])
+            AddAuditRecord(cur_audit_log, "SPC", authenticate.user_id)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
 
@@ -79,6 +84,7 @@ def chooseResponse(userInput):
         #ADU()
         if len(userInput) == 2:
             authenticate.add_user(userInput[1])
+            AddAuditRecord(cur_audit_log, "AU", authenticate.user_id)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
         
@@ -86,6 +92,7 @@ def chooseResponse(userInput):
         #DEU()
         if len(userInput) == 2:
             authenticate.delete_user(userInput[1])
+            AddAuditRecord(cur_audit_log, "DU", authenticate.user_id)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
 
@@ -98,7 +105,8 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 10):
         #DAL
-        quit()
+        DisplayAuditLog(cur_audit_log)
+        print("OK")
 
     elif(command_List.get(userInput[0]) == 11):
         #ADR
@@ -184,7 +192,7 @@ def IMD(filename):
         for row in data:
             new_entry = Account_Entry(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11])
             compiled_addr_book.update({row[0]:new_entry})
-    print("Address Book Import Complete.")
+
 
 
 def ADR(userInput):
@@ -242,15 +250,31 @@ def EXD(userInput):
 
 
 
+
 def ABA():
+    if path.exists("AuditLogs.csv"):
+        ImportAuditLog("AuditLogs.csv", cur_audit_log)
+    else:
+        with open("AuditLogs.csv", "w") as fp:
+            pass
+        ImportAuditLog("AuditLogs.csv", cur_audit_log)
+
+    if path.exists("abadata.csv"):
+        IMD("abadata.csv")
+    else:
+        with open("auditrecord.csv", "w") as fp:
+            pass
+
     print("Address Book Application, version ", version_Num, ". Type \"HLP\" for a list of commands.\n")       
+
+
     while(True):
         input1 = str(input())
         if(input1 != ""):
             input1 = str.split(input1)
             chooseResponse(input1)
         else:
-            print("\nPlease enter a command.\n")
+            print("Please enter a command.\n")
 
 
 if __name__ == "__main__":
@@ -267,5 +291,4 @@ if __name__ == "__main__":
             authenticate.first_admin(username)
     if type(authenticate) != Authentication:
         authenticate = Authentication()
-    
     ABA()
