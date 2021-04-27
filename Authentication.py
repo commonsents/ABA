@@ -5,6 +5,8 @@
 #from passlib.hash import pbkdf2_sha256 # from the passlib library. download with "pip install passlib" in terminal
 import datetime
 import re
+import csv
+from csv import writer
 from Inputs import *
 
 class Authentication:
@@ -28,7 +30,7 @@ class Authentication:
         print("Welcome, " + self.active_user.username + " is now logged in.\n")
         data = open('permissions.csv', 'w')
         info = ""
-        info += username + "," + password + "\n"
+        info += username + "," + password + "," + "admin" + "\n"
         data.write(info)
         data.close()
 
@@ -48,8 +50,9 @@ class Authentication:
         # check if there is an active user
         if self.active_user != 0:
             print("\nAn account is currently active; logout before proceeding.\n")
-        elif username not in self.saved_data:
-            self.first_login(username)
+        elif username in self.saved_data:
+            if self.saved_data[username] == None:
+                self.first_login(username)
         else:
             password = input("\nEnter your password: ")
             if not self.validate_creds(username,password):
@@ -59,6 +62,11 @@ class Authentication:
             else:
                 init_account = Inputs(username,password,self)
                 self.dictionary[username] = init_account
+                with open('permissions.csv','r') as f:
+                    admin_check = csv.reader(f)
+                    for line in admin_check:
+                        if line[2] == "admin":
+                            self.dictionary[username].admin = True
                 self.active_user = self.dictionary[username]
                 self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
                 print("\nOK\n")
@@ -87,6 +95,17 @@ class Authentication:
                     print("New password must be different from previous password.\n")
                     new_password = self.create_password()
                 self.saved_data[self.active_user.username] = new_password
+                updated_list = []
+                with open('permissions.csv', 'r') as b:
+                    update = csv.reader(b)
+                    updated_list.extend(update)
+                updated_line = {self.active_user.username:new_password}
+                with open('permissions.csv', 'w') as b:
+                    writer = csv.writer(b)
+                    for line, row in enumerate(updated_list):
+                        data = updated_line.get(line, row)
+                        print(data)
+                        writer.writerow(data)
                 self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
                 print("Password successfully changed.\n")
     
@@ -155,6 +174,10 @@ class Authentication:
             username = self.check_username(username)
             init_account = Inputs(username, None, self)
             self.dictionary[username] = init_account
+            temp_dict = {username:'Null'}
+            with open('permissions.csv', 'a') as user:
+                    update = writer(user)
+                    update.writerow(temp_dict)
             print("\nOK\n")
             self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
         else:
@@ -185,8 +208,6 @@ class Authentication:
         else:
             print("\nOK\n")
             for i in self.dictionary:
-    <<<<<<< Updated upstream
                 print(self.dictionary.keys() +"\n")
-=======
                 print(self.dictionary.keys(i) +"\n")
->>>>>>> Stashed changes
+
