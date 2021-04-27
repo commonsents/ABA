@@ -42,17 +42,16 @@ def chooseResponse(userInput):
         #LIN(userID)
         if len(userInput) > 1:
             authenticate.login(userInput[1])
-            AddAuditRecord(cur_audit_log,"LS", authenticate.active_user)
+            AddAuditRecord(cur_audit_log,"LS", authenticate.cur_user)
         else:
             print("\nPlease specify userID.\n")
-            ABA()
 
     elif(command_List.get(userInput[0]) == 3):
         #Logout Command
         #LOU()
         if len(userInput) == 1:
+            AddAuditRecord(cur_audit_log, "LO", authenticate.cur_user)
             authenticate.logout()
-            AddAuditRecord(cur_audit_log, "LO", authenticate.active_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
         #print("LO")
@@ -60,6 +59,8 @@ def chooseResponse(userInput):
     elif(command_List.get(userInput[0]) == 4):
         #EXT Command
         SaveAuditLogs(cur_audit_log)
+        blank = ["", "abadata"]
+        EXD(blank)
         print("Thank you for using ABA.")
         quit()
 
@@ -76,11 +77,7 @@ def chooseResponse(userInput):
         #CHP()
         if len(userInput) == 2:
             authenticate.change_password(userInput[1])
-<<<<<<< HEAD
-    
-=======
-            AddAuditRecord(cur_audit_log, "SPC", authenticate.user_id)
->>>>>>> 4552b75cea48b36d25f1b629e0bde9ed0fde7201
+            AddAuditRecord(cur_audit_log, "SPC", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
 
@@ -88,7 +85,7 @@ def chooseResponse(userInput):
         #ADU()
         if len(userInput) == 2:
             authenticate.add_user(userInput[1])
-            AddAuditRecord(cur_audit_log, "AU", authenticate.user_id)
+            AddAuditRecord(cur_audit_log, "AU", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
         
@@ -96,7 +93,7 @@ def chooseResponse(userInput):
         #DEU()
         if len(userInput) == 2:
             authenticate.delete_user(userInput[1])
-            AddAuditRecord(cur_audit_log, "DU", authenticate.user_id)
+            AddAuditRecord(cur_audit_log, "DU", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
 
@@ -261,7 +258,7 @@ def RER(userInput):
 
             for y in range(2, len(userInput)):
                 if userInput[y] in val:
-                    outstring += userInput[y] + "=" + readObj.userInput[y] + " "
+                    outstring += userInput[y] + "=" + getattr(readObj, userInput[y]) + " "
                 else:
                     print("Invalid fieldname (s)")
                     return()
