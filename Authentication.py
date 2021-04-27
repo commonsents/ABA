@@ -15,9 +15,11 @@ class Authentication:
         self.saved_data = {} # data from previous sessions loaded in to this dictionary upon start of program
         #self.password_dict = {} # temporary non-security driven storage for passwords; will be changed upon further implementation
         self.active_user = 0 # 0 = no active user
+        self.cur_user = ""
     
     def first_admin(self,userID):
         username = self.check_username(userID)
+        self.cur_user = username
         password = self.create_password() # still need to implement a hash/encryption method for storing passwords
         init_account = Inputs(username,password,self)
         self.saved_data[username] = password
@@ -42,6 +44,7 @@ class Authentication:
         self.dictionary[username] = full_account
         self.saved_data[username] = password
         self.active_user = self.dictionary[username]
+        self.cur_user = username
         print("Active user now is : " + username + "\n")
         self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
         self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
@@ -68,6 +71,7 @@ class Authentication:
                         if line[2] == "admin":
                             self.dictionary[username].admin = True
                 self.active_user = self.dictionary[username]
+                self.cur_user = username
                 self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
                 print("\nOK\n")
     
@@ -78,6 +82,7 @@ class Authentication:
             print("\nOK\n")
             self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", LO, " + self.active_user.username)
             self.active_user = 0
+            self.cur_user = ""
             print("Logout successful. See you next time!\n")
     
 

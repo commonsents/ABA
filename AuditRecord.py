@@ -11,7 +11,7 @@ class AuditRecord:
         self.user_id = user_id
 
     def __str__(self):
-        val = str(self.date) + ";" + str(self.time_created) + ";" + str(self.audit_type) + ";" + str(self.user_id)
+        val = str(self.date) + ";" + str(self.time_created) + ";" + str(self.audit_type) + ";" + str(self.user_id) + "\n"
         return(val)
 
 def AddAuditRecord(cur_audit_log, audit_type, user_id):
