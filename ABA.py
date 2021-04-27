@@ -106,25 +106,40 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 10):
         #DAL
-        DisplayAuditLog(cur_audit_log)
-        print("OK")
+        if len(userInput) > 1:
+            DisplayAuditLog(cur_audit_log)
+            print("OK")
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
 
     elif(command_List.get(userInput[0]) == 11):
         #ADR
         #Addrecord function
-        ADR(userInput)
+        if len(userInput) > 1:
+            ADR(userInput)
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
 
     elif(command_List.get(userInput[0]) == 12):
         #DER
-        DER(userInput)
+        if len(userInput) == 2:
+            DER(userInput)
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
         
     elif(command_List.get(userInput[0]) == 13):
         #EDR
-        EDR(userInput)
+        if len(userInput) > 1:
+            EDR(userInput)
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
 
     elif(command_List.get(userInput[0]) == 14):
         #RER
-        RER(userInput)
+        if len(userInput) > 1:
+            RER(userInput)
+        else:
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
 
     elif(command_List.get(userInput[0]) == 15):
         #EXD
