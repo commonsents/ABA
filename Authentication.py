@@ -10,14 +10,15 @@ from Inputs import *
 class Authentication:
     def __init__(self):
         self.dictionary = {} # dictionary to map usernames to accounts
-        self.password_dict = {} # temporary non-security driven storage for passwords; will be changed upon further implementation
+        self.saved_data = {} # data from previous sessions loaded in to this dictionary upon start of program
+        #self.password_dict = {} # temporary non-security driven storage for passwords; will be changed upon further implementation
         self.active_user = 0 # 0 = no active user
     
     def first_admin(self,userID):
         username = self.check_username(userID)
         password = self.create_password() # still need to implement a hash/encryption method for storing passwords
         init_account = Inputs(username,password,self)
-        self.password_dict[username] = password
+        self.saved_data[username] = password
         self.dictionary[username] = init_account
         self.dictionary[username].admin = True
         self.active_user = self.dictionary[username]
@@ -37,18 +38,17 @@ class Authentication:
         password = self.create_password()
         full_account = Inputs(username, password, self) # update the definition of the user to include the password associated with the userID to be stored
         self.dictionary[username] = full_account
-        self.password_dict[username] = password
+        self.saved_data[username] = password
         self.active_user = self.dictionary[username]
         print("Active user now is : " + username + "\n")
         self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
         self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
 
-
     def login(self, username):
         # check if there is an active user
         if self.active_user != 0:
             print("\nAn account is currently active; logout before proceeding.\n")
-        elif username not in self.password_dict:
+        elif username not in self.saved_data:
             self.first_login(username)
         else:
             password = input("\nEnter your password: ")
@@ -57,6 +57,8 @@ class Authentication:
                 if username in self.dictionary:
                     self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LF, " + username)
             else:
+                init_account = Inputs(username,password,self)
+                self.dictionary[username] = init_account
                 self.active_user = self.dictionary[username]
                 self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
                 print("\nOK\n")
@@ -75,7 +77,7 @@ class Authentication:
         # check that the user knows the password before changing it
             if self.active_user == 0:
                 print("\nThere is currently no active login session.\n")
-            elif self.password_dict[self.active_user.username] !=  old_password:
+            elif self.saved_data[self.active_user.username] !=  old_password:
                 print("\nInvalid credentials.\n")
                 self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
             else:
@@ -84,7 +86,7 @@ class Authentication:
                 if new_password == old_password:
                     print("New password must be different from previous password.\n")
                     new_password = self.create_password()
-                self.password_dict[self.active_user.username] = new_password
+                self.saved_data[self.active_user.username] = new_password
                 self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
                 print("Password successfully changed.\n")
     
@@ -139,9 +141,9 @@ class Authentication:
 
     def validate_creds(self,username,password):
         # verify userID is in the dictionary and return index if true and -1 if not found
-        if username in self.dictionary:
-            if self.password_dict[username] == password:
-                return self.password_dict[username]
+        if username in self.saved_data:
+            if password == self.saved_data[username]:
+                return self.saved_data[username]
         else:
             return False
     

@@ -1,7 +1,7 @@
 # File: Inputs.py
 # Author: Karston Kelly  
 # Date: 4/17/21
-# Description: Inputs for defining a user and adding to the audit log
+# Description: Inputs for defining a user and adding to an audit log
 
 class Inputs:
     def __init__(self,username,password,database):
