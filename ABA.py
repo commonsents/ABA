@@ -123,7 +123,7 @@ def chooseResponse(userInput):
 
     elif(command_List.get(userInput[0]) == 14):
         #RER
-        quit()
+        RER(userInput)
 
     elif(command_List.get(userInput[0]) == 15):
         #EXD
@@ -228,10 +228,7 @@ def EDR(userInput):
         for y in range(2, len(userInput)):
             nextVal = userInput[y].split("=")
             if nextVal[0] in val:
-                print(nextVal[0] + " " + nextVal[1])
-                print(updateItem.GN)
                 setattr(updateItem, nextVal[0], nextVal[1])
-                print(updateItem.GN)
                 print("OK")
                 return()
 
@@ -249,6 +246,26 @@ def EXD(userInput):
     return()
 
 
+def RER(userInput):
+    val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
+    outstring = ""
+    if userInput[1] in compiled_addr_book.keys():
+        readObj = compiled_addr_book.get(userInput[1])
+        if len(userInput) == 2:
+            print(readObj)
+        else:
+
+            for y in range(2, len(userInput)):
+                if userInput[y] in val:
+                    outstring += userInput[y] + "=" + readObj.userInput[y] + " "
+                else:
+                    print("Invalid fieldname (s)")
+                    return()
+    else:
+        print("RecordID not found")
+        return()
+    print(outstring)
+    print("OK")
 
 
 def ABA():
@@ -264,7 +281,6 @@ def ABA():
     else:
         with open("auditrecord.csv", "w") as fp:
             pass
-
     print("Address Book Application, version ", version_Num, ". Type \"HLP\" for a list of commands.\n")       
 
 
