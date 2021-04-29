@@ -42,7 +42,6 @@ def chooseResponse(userInput):
         #LIN(userID)
         if len(userInput) > 1:
             authenticate.login(userInput[1])
-            AddAuditRecord(cur_audit_log,"LS", authenticate.cur_user)
         else:
             print("\nPlease specify userID.\n")
 
@@ -50,7 +49,6 @@ def chooseResponse(userInput):
         #Logout Command
         #LOU()
         if len(userInput) == 1:
-            AddAuditRecord(cur_audit_log, "LO", authenticate.cur_user)
             authenticate.logout()
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
@@ -77,7 +75,6 @@ def chooseResponse(userInput):
         #CHP()
         if len(userInput) == 2:
             authenticate.change_password(userInput[1])
-            AddAuditRecord(cur_audit_log, "SPC", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
 
@@ -85,7 +82,6 @@ def chooseResponse(userInput):
         #ADU()
         if len(userInput) == 2:
             authenticate.add_user(userInput[1])
-            AddAuditRecord(cur_audit_log, "AU", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
         
@@ -93,7 +89,6 @@ def chooseResponse(userInput):
         #DEU()
         if len(userInput) == 2:
             authenticate.delete_user(userInput[1])
-            AddAuditRecord(cur_audit_log, "DU", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
 
