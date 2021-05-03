@@ -42,7 +42,6 @@ def chooseResponse(userInput):
         #LIN(userID)
         if len(userInput) > 1:
             authenticate.login(userInput[1])
-            AddAuditRecord(cur_audit_log,"LS", authenticate.cur_user)
         else:
             print("\nPlease specify userID.\n")
 
@@ -50,7 +49,6 @@ def chooseResponse(userInput):
         #Logout Command
         #LOU()
         if len(userInput) == 1:
-            AddAuditRecord(cur_audit_log, "LO", authenticate.cur_user)
             authenticate.logout()
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
@@ -77,7 +75,6 @@ def chooseResponse(userInput):
         #CHP()
         if len(userInput) == 2:
             authenticate.change_password(userInput[1])
-            AddAuditRecord(cur_audit_log, "SPC", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
 
@@ -85,7 +82,6 @@ def chooseResponse(userInput):
         #ADU()
         if len(userInput) == 2:
             authenticate.add_user(userInput[1])
-            AddAuditRecord(cur_audit_log, "AU", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
         
@@ -93,7 +89,6 @@ def chooseResponse(userInput):
         #DEU()
         if len(userInput) == 2:
             authenticate.delete_user(userInput[1])
-            AddAuditRecord(cur_audit_log, "DU", authenticate.cur_user)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
 
@@ -311,13 +306,8 @@ def ABA():
 
 if __name__ == "__main__":
     authenticate = Authentication()
-    user_info = open("permissions.csv")
-    #user_info = csv.reader(user_info)
-    #user_info.seek(0, os.SEEK_END) # go to end of file
-    #if user_info.tell(): # if current position is truish (i.e != 0)
-        #user_info.seek(0) # rewind the file for later use 
+    user_info = open("permissions.csv") 
     for line in csv.reader(user_info):
-        #(key,value) = user_info.split()
         authenticate.saved_data[line[0]] = line[1]
         print(authenticate.saved_data)
     if not authenticate.saved_data:
@@ -325,6 +315,7 @@ if __name__ == "__main__":
         print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
         username = input("Choose a username for the admin account: ")
         authenticate.first_admin(username)
+    user_info.close()
     if type(authenticate) != Authentication:
         authenticate = Authentication()
     ABA()

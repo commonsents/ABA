@@ -5,6 +5,10 @@
 #from passlib.hash import pbkdf2_sha256 # from the passlib library. download with "pip install passlib" in terminal
 import datetime
 import re
+import csv
+from csv import writer
+from AuditRecord import *
+from ABA import cur_audit_log
 from Inputs import *
 
 class Authentication:
@@ -24,13 +28,13 @@ class Authentication:
         self.dictionary[username] = init_account
         self.dictionary[username].admin = True
         self.active_user = self.dictionary[username]
-        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
-        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
-        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
+        AddAuditRecord(cur_audit_log,"AU", self.cur_user)
+        AddAuditRecord(cur_audit_log,"L1", self.cur_user)
+        AddAuditRecord(cur_audit_log,"LS", self.cur_user)
         print("Welcome, " + self.active_user.username + " is now logged in.\n")
         data = open('permissions.csv', 'w')
         info = ""
-        info += username + "," + password + "\n"
+        info += username + "," + password + "," + "admin" + "\n"
         data.write(info)
         data.close()
 
@@ -42,38 +46,63 @@ class Authentication:
         self.dictionary[username] = full_account
         self.saved_data[username] = password
         self.active_user = self.dictionary[username]
+        updated_user_file = []
+        with open('permissions.csv', 'r+') as readFile:
+            reader = csv.reader(readFile)
+            for row in reader:
+                updated_user_file.append(row)
+                for field in row:
+                    if field == self.active_user.username:
+                        updated_user_file.remove(row)
+        if self.active_user.admin:
+            new_info = [self.active_user.username, password,'admin']
+        else:
+            new_info = [self.active_user.username, password,'user']
+        with open('permissions.csv', 'w') as writeFile:
+            writer = csv.writer(writeFile)
+            writer.writerows(updated_user_file)
+            writer.writerow(new_info)
         self.cur_user = username
         print("Active user now is : " + username + "\n")
-        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", L1, " + username)
-        self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + username)
+        AddAuditRecord(cur_audit_log,"L1", self.cur_user)
+        AddAuditRecord(cur_audit_log,"LS", self.cur_user)
 
     def login(self, username):
         # check if there is an active user
         if self.active_user != 0:
             print("\nAn account is currently active; logout before proceeding.\n")
-        elif username not in self.saved_data:
-            self.first_login(username)
-        else:
-            password = input("\nEnter your password: ")
-            if not self.validate_creds(username,password):
-                print("\nInvalid credentials.\n")
-                if username in self.dictionary:
-                    self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LF, " + username)
+        elif username in self.saved_data:
+            if self.saved_data[username] == 'temp':
+                self.first_login(username)
             else:
-                init_account = Inputs(username,password,self)
-                self.dictionary[username] = init_account
-                self.active_user = self.dictionary[username]
-                self.cur_user = username
-                self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", LS, " + self.active_user.username)
-                print("\nOK\n")
-    
+                password = input("\nEnter your password: ")
+                if not self.validate_creds(username,password):
+                    print("\nInvalid credentials.\n")
+                    if username in self.dictionary:
+                        AddAuditRecord(cur_audit_log,"LF", username)
+                else:
+                    init_account = Inputs(username,password,self)
+                    self.dictionary[username] = init_account
+                    with open('permissions.csv','r') as f:
+                        admin_check = csv.reader(f)
+                        for line in admin_check:
+                            if line[2] == "admin":
+                                self.dictionary[username].admin = True
+                                break
+                    self.active_user = self.dictionary[username]
+                    self.cur_user = username
+                    print("\nOK\n")
+                    AddAuditRecord(cur_audit_log,"LS", self.cur_user)
+        else:
+            print("\nCredentials not found.\n")
+
     def logout(self):
         if self.active_user == 0:
             print("\nThere is currently no active login session.\n")
         else:
             print("\nOK\n")
-            self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", LO, " + self.active_user.username)
             self.active_user = 0
+            AddAuditRecord(cur_audit_log, "LO", self.cur_user)
             self.cur_user = ""
             print("Logout successful. See you next time!\n")
     
@@ -84,15 +113,32 @@ class Authentication:
                 print("\nThere is currently no active login session.\n")
             elif self.saved_data[self.active_user.username] !=  old_password:
                 print("\nInvalid credentials.\n")
-                self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", FPC, " + self.active_user.username)
+                AddAuditRecord(cur_audit_log,"FPC", self.cur_user)
             else:
                 print("\nCreate a new password.")
                 new_password = self.create_password()
                 if new_password == old_password:
-                    print("New password must be different from previous password.\n")
+                    print("Password is too easy to guess.\n")
                     new_password = self.create_password()
+                    AddAuditRecord(cur_audit_log,"FPC", self.cur_user)
                 self.saved_data[self.active_user.username] = new_password
-                self.dictionary[self.active_user.username].log_entry(str(datetime.datetime.now()) + ", SPC, " + self.active_user.username)
+                updated_user_file = []
+                with open('permissions.csv', 'r+') as readFile:
+                    reader = csv.reader(readFile)
+                    for row in reader:
+                        updated_user_file.append(row)
+                        for field in row:
+                            if field == self.active_user.username:
+                                updated_user_file.remove(row)
+                if self.active_user.admin:
+                    new_info = [self.active_user.username, new_password,'admin']
+                else:
+                    new_info = [self.active_user.username, new_password,'user']
+                with open('permissions.csv', 'w') as writeFile:
+                    writer = csv.writer(writeFile)
+                    writer.writerows(updated_user_file)
+                    writer.writerow(new_info)
+                AddAuditRecord(cur_audit_log,"SPC", self.cur_user)
                 print("Password successfully changed.\n")
     
 
@@ -154,14 +200,20 @@ class Authentication:
     
 
     def add_user(self, username):
-        if len(self.dictionary) == 8:
+        if len(self.saved_data) == 8:
             print("\nMaximum amount of users reached. You cannot any add more users until at least one is deleted\n")
         elif type(self.active_user) == Inputs and self.active_user.admin:
             username = self.check_username(username)
             init_account = Inputs(username, None, self)
             self.dictionary[username] = init_account
+            self.cur_user = username
+            self.saved_data[username] = 'temp'      # saved as 'temp' as to trigger first_login call upon the first login of the new user
+            temp_list = [username, 'temp','user']   # create a temporary password & define as user
+            with open('permissions.csv', 'a') as user:
+                    update = writer(user)
+                    update.writerow(temp_list)
             print("\nOK\n")
-            self.dictionary[username].log_entry(str(datetime.datetime.now()) + ", AU, " + self.active_user.username)
+            AddAuditRecord(cur_audit_log, "AU", self.cur_user)
         else:
             print("\nAdmin account must be active\n")
 
@@ -171,12 +223,23 @@ class Authentication:
             print("\nAdmin account must be active\n")
         elif not self.active_user.admin:
             print("\nAdmin account must be active\n")
-        elif username in self.dictionary and type(self.active_user) == Inputs and self.active_user.admin:
+        elif username in self.saved_data:
             if self.active_user.username == username:
                 print("\nAn admin account cannot delete itself\n")
             else:
-                del self.dictionary[username]
-                self.active_user.log_entry(str(datetime.datetime.now()) + ", DU, " + self.active_user.username)
+                del self.saved_data[username]
+                deleted_user_file = []
+                with open('permissions.csv', 'r+') as readFile:
+                    reader = csv.reader(readFile)
+                    for row in reader:
+                        deleted_user_file.append(row)
+                        for field in row:
+                            if field == username:
+                                deleted_user_file.remove(row)
+                with open('permissions.csv', 'w') as writeFile:
+                    writer = csv.writer(writeFile)
+                    writer.writerows(deleted_user_file)
+                AddAuditRecord(cur_audit_log, "DU", username)
                 print("\nOK, user successfully deleted\n")
 
         else:
@@ -188,6 +251,9 @@ class Authentication:
         elif not self.active_user.admin:
             print("\nAdmin account must be active\n")
         else:
-            print("\nOK\n")
-            for i in self.dictionary:
-                print(self.dictionary.keys() +"\n")
+            print("\n")
+            with open('permissions.csv', 'r') as users:
+                contents = csv.reader(users)
+                for row in contents:
+                    print(row[0] + "\n")
+
