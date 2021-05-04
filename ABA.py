@@ -309,9 +309,7 @@ if __name__ == "__main__":
     user_info = open("permissions.csv") 
     for line in csv.reader(user_info):
         authenticate.saved_data[line[0]] = line[1]
-        print(authenticate.saved_data)
     if not authenticate.saved_data:
-        print("\nYou need to create an admin account to use the ABA.")
         print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
         username = input("Choose a username for the admin account: ")
         authenticate.first_admin(username)
