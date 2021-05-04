@@ -31,7 +31,6 @@ class Authentication:
         AddAuditRecord(cur_audit_log,"AU", self.cur_user)
         AddAuditRecord(cur_audit_log,"L1", self.cur_user)
         AddAuditRecord(cur_audit_log,"LS", self.cur_user)
-        print("Welcome, " + self.active_user.username + " is now logged in.\n")
         data = open('permissions.csv', 'w')
         info = ""
         info += username + "," + password + "," + "admin" + "\n"
@@ -40,7 +39,6 @@ class Authentication:
 
         
     def first_login(self,username):
-        print("\nThis is the first time this account is being used. You must create a new password.\n")
         password = self.create_password()
         full_account = Inputs(username, password, self) # update the definition of the user to include the password associated with the userID to be stored
         self.dictionary[username] = full_account
@@ -63,7 +61,7 @@ class Authentication:
             writer.writerows(updated_user_file)
             writer.writerow(new_info)
         self.cur_user = username
-        print("Active user now is : " + username + "\n")
+        print("\nOK\n")
         AddAuditRecord(cur_audit_log,"L1", self.cur_user)
         AddAuditRecord(cur_audit_log,"LS", self.cur_user)
 
@@ -94,7 +92,7 @@ class Authentication:
                     print("\nOK\n")
                     AddAuditRecord(cur_audit_log,"LS", self.cur_user)
         else:
-            print("\nCredentials not found.\n")
+            print("\nInvalid credentials.\n")
 
     def logout(self):
         if self.active_user == 0:
@@ -104,7 +102,6 @@ class Authentication:
             self.active_user = 0
             AddAuditRecord(cur_audit_log, "LO", self.cur_user)
             self.cur_user = ""
-            print("Logout successful. See you next time!\n")
     
 
     def change_password(self, old_password):
@@ -115,7 +112,7 @@ class Authentication:
                 print("\nInvalid credentials.\n")
                 AddAuditRecord(cur_audit_log,"FPC", self.cur_user)
             else:
-                print("\nCreate a new password.")
+                print("\nCreate a new password. Passwords may contain up to 24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
                 new_password = self.create_password()
                 if new_password == old_password:
                     print("Password is too easy to guess.\n")
@@ -139,7 +136,7 @@ class Authentication:
                     writer.writerows(updated_user_file)
                     writer.writerow(new_info)
                 AddAuditRecord(cur_audit_log,"SPC", self.cur_user)
-                print("Password successfully changed.\n")
+                print("\nOK\n")
     
 
     def check_username(self,entry):
@@ -167,7 +164,7 @@ class Authentication:
 
     def create_password(self):
         # call this function when a new user account is created to verify their password input
-        print("\nPasswords may contain 8-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
+        print("\nThis is the first time the account is being used. You must create a new password. Passwords may contain 8-24 upper- or lower-case letters or numbers. Choose an uncommon password that would be difficult to guess.\n")
         password = ""
         while password == "":
             password = input("Please enter a valid password: ")
@@ -201,7 +198,7 @@ class Authentication:
 
     def add_user(self, username):
         if len(self.saved_data) == 8:
-            print("\nMaximum amount of users reached. You cannot any add more users until at least one is deleted\n")
+            print("\nMaximum amount of users reached. You cannot any add more users until at least one is deleted.\n")
         elif type(self.active_user) == Inputs and self.active_user.admin:
             username = self.check_username(username)
             init_account = Inputs(username, None, self)
@@ -240,10 +237,10 @@ class Authentication:
                     writer = csv.writer(writeFile)
                     writer.writerows(deleted_user_file)
                 AddAuditRecord(cur_audit_log, "DU", username)
-                print("\nOK, user successfully deleted\n")
+                print("\nOK\n")
 
         else:
-            print("\nUser " + username + " does not exist\n")
+            print("\nAccount does not exist\n")
 
     def list_users(self):
         if self.active_user == 0:
