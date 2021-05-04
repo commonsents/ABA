@@ -1,5 +1,6 @@
 #Input piping using the other 2 modules
 from caseGenerator import fuzzer
+from queue import Queue
 import os
 
 #These 2 are designed to check the output of the program according to specifications and generate a report if it does not match expected results
@@ -9,11 +10,11 @@ def checkProgramOutput(programOutput):
     #If ok
     #   return()
     #else 
-    #   generateReport()
+    #   generateReport(programOutput)
     quit()
 
     
-def generateReport():
+def generateReport(programOutput):
     #Generate a Report that will be piped to some specified filename
     #This should just be a series of print statements, since we will pipe the info via the CLI
     #print(Input Value: ...)
@@ -23,6 +24,13 @@ def generateReport():
 
 if __name__ == "__main__":
     input1 = input()
+    prevInputs = Queue(maxsize=5)
+    prevInputs.put(input1)
+
     while(input1 != ""):
-        checkProgramOutput(input1)
-    print(input1)
+        if prevInputs.full():
+            prevInputs.get()
+        prevInputs.put(input1)
+        checkProgramOutput(prevInputs)
+
+

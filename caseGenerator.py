@@ -11,4 +11,11 @@ def fuzzer(max_length=100, char_start=32, char_range=32):
     return out
     
 if __name__ == "__main__":
-    print(fuzzer())
+    inputs = ["LIN h", "hhhhhhhh"]
+    x = 0
+    while x < 3:
+        inputs.append(fuzzer())
+        x += 1
+    for y in inputs:
+        print(y)
+    print("EXT")
