@@ -13,9 +13,29 @@ def fuzzer(max_length=100, char_start=32, char_range=32):
 if __name__ == "__main__":
     inputs = ["LIN h", "hhhhhhhh"]
     x = 0
-    while x < 3:
+    while x < 100:
         inputs.append(fuzzer())
         x += 1
+    x = 0
+    while x < 100:
+        inputs.append("IMD " + fuzzer())
+        x +=1
+    x = 0
+    while x < 100:
+        inputs.append("ADU " + fuzzer())
+        x +=1
+    x = 0
+    while x < 100:
+        inputs.append("DLU " + fuzzer())
+        x +=1
+    x = 0
+    while x < 100:
+        inputs.append("EDR " + fuzzer())
+        x +=1
+    x = 0
+    while x < 100:
+        inputs.append("ADR " + fuzzer())
+        x +=1
     for y in inputs:
         print(y)
     print("EXT")

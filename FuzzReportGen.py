@@ -5,7 +5,7 @@ import os
 
 #These 2 are designed to check the output of the program according to specifications and generate a report if it does not match expected results
 #You guys need to check the output of the program against the expected result at each section of the code.
-def checkProgramOutput(programOutput):
+def checkProgramOutput(programOutput, cur_pos):
     #Look through expected output of project in the project specs and if the program sees one of those codes, it will NOT generate a report 
     valid_outputs = []
     valid_outputs.append("An account is currently active; logout before proceeding")
@@ -64,27 +64,38 @@ def checkProgramOutput(programOutput):
     if programOutput in valid_outputs:
         return()
     else: 
-       generateReport(programOutput)
-    quit()
+       generateReport(programOutput, cur_pos)
+
 
     
-def generateReport(programOutput):
+def generateReport(programOutput, cur_pos):
     #Generate a Report that will be piped to some specified filename
     #This should just be a series of print statements, since we will pipe the info via the CLI
     #print(Input Value: ...)
     #print(Error Received: ...)
-    quit()
+    print("Case Generated: ")
+    end = cur_pos - 1
+    if end == -1:
+        end = 4
+    while end != cur_pos:
+        print(programOutput[cur_pos]) 
+        cur_pos = (cur_pos + 1) % 5
+
 
 
 if __name__ == "__main__":
     input1 = input()
-    prevInputs = Queue(maxsize=5)
-    prevInputs.put(input1)
+    prevInputs = ["","","","",""]
+
+    prevInputs[0] = input1
+    x = 1
 
     while(input1 != ""):
-        if prevInputs.full():
-            prevInputs.get()
-        prevInputs.put(input1)
-        checkProgramOutput(prevInputs)
+        if x < 5:
+            prevInputs[x] = input1
+            x += 1
+            x = x%5
+        checkProgramOutput(prevInputs, x)
+        input1 = input()
 
 
