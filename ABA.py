@@ -6,6 +6,7 @@ import sys
 import csv 
 import os.path
 import queue
+from cryptography.fernet import Fernet 
 from os import path
 from Account_Entry import *
 from Authentication import *
@@ -14,6 +15,7 @@ from AuditRecord import *
 version_Num = "1.1"
 command_List = {"HLP": 1, "LIN": 2, "LOU": 3, "EXT": 4, "IMD": 5, "CHP": 6, "ADU": 7, "DEU": 8, "LSU": 9, "DAL": 10, "ADR": 11, "DER": 12, "EDR": 13, "RER": 14, "EXD": 15}
 address_book_file = "testDB.csv"
+
 
 
 #Admin of 0 means that a user is not logged into an administrator account. 
@@ -26,7 +28,7 @@ cur_audit_log = queue.Queue(512)
 
 
 #Command that chooses which response to take based on input received from user. 
-def chooseResponse(userInput):
+def chooseResponse(userInput, filekey):
     #userInput is split by word, userInput[0] represents the command while 
     #userInput[1] or more represents any arguments required for the command
 
@@ -57,8 +59,7 @@ def chooseResponse(userInput):
     elif(command_List.get(userInput[0]) == 4):
         #EXT Command
         SaveAuditLogs(cur_audit_log)
-        blank = ["", "abadata"]
-        EXD(blank)
+        EncryptAbaData(filekey)
         print("Thank you for using ABA.")
         quit()
 
@@ -66,7 +67,7 @@ def chooseResponse(userInput):
         #IMD command
         #Need to check for length on document
         if len(userInput)>1:
-            res = IMD(userInput[1])
+            res = IMD(userInput[1], filekey)
             if res == 1:
                 print("Address Book Import Complete.")
         else:
@@ -197,7 +198,7 @@ def help(cmd = ""):
 
 
 
-def IMD(filename):
+def IMD(filename, filekey = ""):
     #Reads in input from specified .csv file. Currently seperates by commas.
     invalid = ["<", ">", ":","\"", "\\", "/", "|", "?", "*"]
     for x in invalid:
@@ -207,6 +208,8 @@ def IMD(filename):
     
     if os.path.exists(filename):
         try:
+            if filename == "abadata.csv":
+                decryptFile(filename, filekey)
             if ".csv" in filename:
                 with open(filename,'rt') as f:
                     data = csv.reader(f)
@@ -214,6 +217,7 @@ def IMD(filename):
                         new_entry = Account_Entry(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11])
                         compiled_addr_book.update({row[0]:new_entry})
                 f.close()
+                EncryptAbaData(filekey)
                 return(1)
             else:
                 print("Input_file invalid format")
@@ -225,6 +229,31 @@ def IMD(filename):
         print("Can't open Input_file")
 
 
+
+
+def EncryptAbaData(filekey):
+    outString = ""
+    with open("abadata.csv", 'w') as f:
+        for key in compiled_addr_book.keys():
+            x = compiled_addr_book.get(key)
+            outString += x.recordID + "," + x.SN + "," + x.GN + "," + x.PEM + "," \
+            + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
+        f.write(outString)
+    fernet = Fernet(filekey)
+    with open("abadata.csv", "rb") as file:
+        original = file.read()
+    encrypted = fernet.encrypt(original)
+    with open("abadata.csv", "wb") as encrypted_file:
+        encrypted_file.write(encrypted)
+
+
+def decryptFile(filename, filekey):
+    fernet = Fernet(filekey)
+    with open('abadata.csv', 'rb') as enc_file:
+        encrypted = enc_file.read()
+    decrypted = fernet.decrypt(encrypted)
+    with open('abadata.csv', 'wb') as dec_file:
+        dec_file.write(decrypted)
 
 
 
@@ -303,7 +332,7 @@ def RER(userInput):
     print("OK")
 
 
-def ABA():
+def ABA(filekey):
     if path.exists("AuditLogs.csv"):
         ImportAuditLog("AuditLogs.csv", cur_audit_log)
     else:
@@ -313,33 +342,53 @@ def ABA():
         fp.close()
 
     if path.exists("abadata.csv"):
-        IMD("abadata.csv")
+        IMD("abadata.csv", filekey)
     else:
         with open("auditrecord.csv", "w") as fp:
             pass
         fp.close()
     print("Address Book Application, version ", version_Num, ". Type \"HLP\" for a list of commands.\n")       
 
-
     while(True):
         input1 = str(input())
         if(input1 != ""):
             input1 = str.split(input1)
-            chooseResponse(input1)
+            chooseResponse(input1, filekey)
         else:
             print("Please enter a command.\n")
 
+def generateKey():
+    if path.exists("filekey.key"):
+        with open('filekey.key', 'rb') as filekey:
+            key = filekey.read()
+        filekey.close()
+    else:
+        key = Fernet.generate_key()
+        with open('filekey.key', 'wb') as filekey:
+            filekey.write(key)
+        filekey.close()
+    return(key)
 
 if __name__ == "__main__":
+    if path.exists("filekey.key"):
+        newkey = 0
+    else:
+        newkey = 1
+    key = generateKey()
+
+
     authenticate = Authentication()
     user_info = open("permissions.csv") 
+
     for line in csv.reader(user_info):
         authenticate.saved_data[line[0]] = line[1]
+
     if not authenticate.saved_data:
         print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
         username = input("Choose a username for the admin account: ")
         authenticate.first_admin(username,cur_audit_log)
     user_info.close()
+
     if type(authenticate) != Authentication:
         authenticate = Authentication()
-    ABA()
+    ABA(key)
