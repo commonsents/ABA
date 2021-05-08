@@ -41,7 +41,7 @@ def chooseResponse(userInput):
         #Login Command
         #LIN(userID)
         if len(userInput) > 1:
-            authenticate.login(userInput[1])
+            authenticate.login(userInput[1],cur_audit_log)
         else:
             print("\nPlease specify userID.\n")
 
@@ -49,9 +49,9 @@ def chooseResponse(userInput):
         #Logout Command
         #LOU()
         if len(userInput) == 1:
-            authenticate.logout()
+            authenticate.logout(cur_audit_log)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LOU' command.\n")
         #print("LO")
 
     elif(command_List.get(userInput[0]) == 4):
@@ -74,21 +74,21 @@ def chooseResponse(userInput):
     elif(command_List.get(userInput[0]) == 6):
         #CHP()
         if len(userInput) == 2:
-            authenticate.change_password(userInput[1])
+            authenticate.change_password(userInput[1],cur_audit_log)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
 
     elif(command_List.get(userInput[0]) == 7):
         #ADU()
         if len(userInput) == 2:
-            authenticate.add_user(userInput[1])
+            authenticate.add_user(userInput[1],cur_audit_log)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
         
     elif(command_List.get(userInput[0]) == 8):
         #DEU()
         if len(userInput) == 2:
-            authenticate.delete_user(userInput[1])
+            authenticate.delete_user(userInput[1],cur_audit_log)
         else:
             print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
 
@@ -105,7 +105,7 @@ def chooseResponse(userInput):
             DisplayAuditLog(cur_audit_log)
             print("OK")
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'DAL' command.\n")
 
     elif(command_List.get(userInput[0]) == 11):
         #ADR
@@ -113,28 +113,28 @@ def chooseResponse(userInput):
         if len(userInput) > 1:
             ADR(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'ADR' command.\n")
 
     elif(command_List.get(userInput[0]) == 12):
         #DER
         if len(userInput) == 2:
             DER(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'DER' command.\n")
         
     elif(command_List.get(userInput[0]) == 13):
         #EDR
         if len(userInput) > 1:
             EDR(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'EDR' command.\n")
 
     elif(command_List.get(userInput[0]) == 14):
         #RER
         if len(userInput) > 1:
             RER(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'RER' command.\n")
 
     elif(command_List.get(userInput[0]) == 15):
         #EXD
@@ -192,7 +192,7 @@ def help(cmd = ""):
     elif cmd == "EXT":
         print("Exit: EXT\n")
     else:
-        print("No such instructions exists.")
+        print("Unrecognized command")
 
 
 
@@ -210,7 +210,7 @@ def ADR(userInput):
     val = {"SN": 1, "GN":2,"PEM":3, "WEM":4,"PPH":5,"WPH":6, "SA":7, "CITY":8, "STP": 9, "CTY":10, "PC":11}
     account_items = [userInput[1],"","","","","","","","","","",""]
     if userInput[1] in compiled_addr_book:
-        print("There is already a record with this ID. Please choose another.")
+        print("Duplicate recordID")
         return()
     else:
         for x in range(2,len(userInput)):
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     if not authenticate.saved_data:
         print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
         username = input("Choose a username for the admin account: ")
-        authenticate.first_admin(username)
+        authenticate.first_admin(username,cur_audit_log)
     user_info.close()
     if type(authenticate) != Authentication:
         authenticate = Authentication()
