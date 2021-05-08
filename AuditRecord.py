@@ -11,7 +11,7 @@ class AuditRecord:
         self.user_id = user_id
 
     def __str__(self):
-        val = str(self.date) + ";" + str(self.time_created) + ";" + str(self.audit_type) + ";" + str(self.user_id) + "\n"
+        val = str(self.date) + "," + str(self.time_created) + "," + str(self.audit_type) + "," + str(self.user_id) + "\n"
         return(val)
 
 def AddAuditRecord(cur_audit_log, audit_type, user_id):
@@ -33,12 +33,13 @@ def ImportAuditLog(filename, cur_audit_log):
     with open(filename,'rt') as f:
         data = csv.reader(f)
         for row in data:
-            new_entry = AuditRecord(row[3], row[4])
+            new_entry = AuditRecord(row[2], row[3])
             new_entry.date = row[0]
             new_entry.time_created = row[1]
             if cur_audit_log.full() == True:
                 cur_audit_log.get()
             cur_audit_log.put(new_entry)
+    f.close()
 
 
 def DisplayAuditLog(cur_audit_log, userID = ""):

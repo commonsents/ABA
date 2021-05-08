@@ -66,8 +66,9 @@ def chooseResponse(userInput):
         #IMD command
         #Need to check for length on document
         if len(userInput)>1:
-            IMD(userInput[1])
-            print("Address Book Import Complete.")
+            res = IMD(userInput[1])
+            if res == 1:
+                print("Address Book Import Complete.")
         else:
             print("No Input_File specified.")
 
@@ -197,12 +198,34 @@ def help(cmd = ""):
 
 
 def IMD(filename):
-    #Reads in input from specified .csv file. Currently seperates by commas. 
-    with open(filename,'rt') as f:
-        data = csv.reader(f)
-        for row in data:
-            new_entry = Account_Entry(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11])
-            compiled_addr_book.update({row[0]:new_entry})
+    #Reads in input from specified .csv file. Currently seperates by commas.
+    invalid = ["<", ">", ":","\"", "\\", "/", "|", "?", "*"]
+    for x in invalid:
+        if x in filename:
+            print("Input_file invalid format")
+            return()
+    
+    if os.path.exists(filename):
+        try:
+            if ".csv" in filename:
+                with open(filename,'rt') as f:
+                    data = csv.reader(f)
+                    for row in data:
+                        new_entry = Account_Entry(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11])
+                        compiled_addr_book.update({row[0]:new_entry})
+                f.close()
+                return(1)
+            else:
+                print("Input_file invalid format")
+                return()
+        except IOError as e:
+            print("Input_file invalid format")
+            return()
+    else:
+        print("Can't open Input_file")
+
+
+
 
 
 
@@ -253,6 +276,7 @@ def EXD(userInput):
         outString += x.recordID + "," + x.SN + "," + x.GN + "," + x.PEM + "," \
             + x.WEM + "," + x.PPH + "," + x.WPH + "," + x.SA + "," + x.CITY + "," + x.STP + "," + x.CTY + "," + x.PC + ",\n"
     f.write(outString)
+    f.close()
     print("OK")
     return()
 
@@ -286,12 +310,14 @@ def ABA():
         with open("AuditLogs.csv", "w") as fp:
             pass
         ImportAuditLog("AuditLogs.csv", cur_audit_log)
+        fp.close()
 
     if path.exists("abadata.csv"):
         IMD("abadata.csv")
     else:
         with open("auditrecord.csv", "w") as fp:
             pass
+        fp.close()
     print("Address Book Application, version ", version_Num, ". Type \"HLP\" for a list of commands.\n")       
 
 
