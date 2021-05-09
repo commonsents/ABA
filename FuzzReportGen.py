@@ -91,10 +91,11 @@ if __name__ == "__main__":
     x = 1
 
     while(input1 != ""):
-        if x < 5:
-            prevInputs[x] = input1
-            x += 1
-            x = x%5
+        if input1 != "\n":
+            if x < 5:
+                prevInputs[x] = input1
+                x += 1
+                x = x%5
         checkProgramOutput(prevInputs, x)
         input1 = input()
 

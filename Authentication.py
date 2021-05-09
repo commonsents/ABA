@@ -44,6 +44,7 @@ class Authentication:
         else:
             with open("permissions.csv", "w") as fp:
                 pass
+            fp.close()
 
         
     def first_login(self,username,cur_audit_log):
@@ -158,7 +159,7 @@ class Authentication:
         username = ""
         while username == "":
             if len(entry) > 16 or len(entry) < 1:
-                print("\nUserID contains invalid number of characters.\n")
+                print("\nUserID contains invalid number of characters.")
                 entry = input("\nPlease enter a new userID: ")
                 username = ""
             else:
@@ -184,7 +185,7 @@ class Authentication:
         while password == "":
             password = input("Please enter a valid password: ")
             if len(password) > 24 or len(password) < 8:
-                print("\nPassword contains invalid number of characters.\n")
+                print("\nPassword contains invalid number of characters.")
                 password = ""
             else:
                 mat = re.fullmatch('[A-Za-z0-9]+', password)
@@ -194,10 +195,10 @@ class Authentication:
                         print("\nOK\n")
                         return password
                     else:
-                        print("\nPasswords do not match.\n")
+                        print("\nPasswords do not match.")
                         password = ""
                 else:
-                    print("\nPassword contains illegal characters.\n")
+                    print("\nPassword contains illegal characters.")
                     password = ""
                         
 
@@ -213,7 +214,7 @@ class Authentication:
 
     def add_user(self, username,cur_audit_log):
         if len(self.saved_data) == 8:
-            print("\nMaximum amount of users reached. You cannot any add more users until at least one is deleted.\n")
+            print("\nMaximum amount of users reached. You cannot any add more users until at least one is deleted.")
         elif type(self.active_user) == Inputs and self.active_user.admin:
             username = self.check_username(username)
             init_account = Inputs(username, None, self)
@@ -224,21 +225,21 @@ class Authentication:
             with open('permissions.csv', 'a') as user:
                     update = writer(user)
                     update.writerow(temp_list)
-            print("\nOK\n")
+            print("\nOK")
             AddAuditRecord(cur_audit_log, "AU", self.cur_user)
             SaveAuditLogs(cur_audit_log)
         else:
-            print("\nAdmin account must be active\n")
+            print("\nAdmin account must be active")
 
     # Only admin can delete user accounts
     def delete_user(self, username,cur_audit_log):
         if self.active_user == 0:
-            print("\nAdmin account must be active\n")
+            print("\nAdmin account must be active")
         elif not self.active_user.admin:
-            print("\nAdmin account must be active\n")
+            print("\nAdmin account must be active")
         elif username in self.saved_data:
             if self.active_user.username == username:
-                print("\nAn admin account cannot delete itself\n")
+                print("\nAn admin account cannot delete itself")
             else:
                 del self.saved_data[username]
                 deleted_user_file = []
@@ -257,11 +258,11 @@ class Authentication:
                 print("\nOK\n")
 
         else:
-            print("\nAccount does not exist\n")
+            print("\nAccount does not exist")
 
     def list_users(self):
         if self.active_user == 0:
-            print("\nThere is currently no active login session.\n")
+            print("\nThere is currently no active login session.")
         elif not self.active_user.admin:
             print("\nAdmin account must be active\n")
         else:
