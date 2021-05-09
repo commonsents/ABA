@@ -45,7 +45,7 @@ def chooseResponse(userInput, filekey):
         if len(userInput) > 1:
             authenticate.login(userInput[1],cur_audit_log)
         else:
-            print("\nPlease specify userID.\n")
+            print("Please specify userID.")
 
     elif(command_List.get(userInput[0]) == 3):
         #Logout Command
@@ -53,7 +53,7 @@ def chooseResponse(userInput, filekey):
         if len(userInput) == 1:
             authenticate.logout(cur_audit_log)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'LOU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LOU' command.")
         #print("LO")
 
     elif(command_List.get(userInput[0]) == 4):
@@ -78,28 +78,28 @@ def chooseResponse(userInput, filekey):
         if len(userInput) == 2:
             authenticate.change_password(userInput[1],cur_audit_log)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'CHP' command.")
 
     elif(command_List.get(userInput[0]) == 7):
         #ADU()
         if len(userInput) == 2:
             authenticate.add_user(userInput[1],cur_audit_log)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'ADU' command.")
         
     elif(command_List.get(userInput[0]) == 8):
         #DEU()
         if len(userInput) == 2:
             authenticate.delete_user(userInput[1],cur_audit_log)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'DEU' command.")
 
     elif(command_List.get(userInput[0]) == 9):
         #LSU()
         if len(userInput) == 1:
             authenticate.list_users()
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'LSU' command.")
 
     elif(command_List.get(userInput[0]) == 10):
         #DAL
@@ -107,7 +107,7 @@ def chooseResponse(userInput, filekey):
             DisplayAuditLog(cur_audit_log)
             print("OK")
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'DAL' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'DAL' command.")
 
     elif(command_List.get(userInput[0]) == 11):
         #ADR
@@ -115,28 +115,28 @@ def chooseResponse(userInput, filekey):
         if len(userInput) > 1:
             ADR(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'ADR' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'ADR' command.")
 
     elif(command_List.get(userInput[0]) == 12):
         #DER
         if len(userInput) == 2:
             DER(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'DER' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'DER' command.")
         
     elif(command_List.get(userInput[0]) == 13):
         #EDR
         if len(userInput) > 1:
             EDR(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'EDR' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'EDR' command.")
 
     elif(command_List.get(userInput[0]) == 14):
         #RER
         if len(userInput) > 1:
             RER(userInput)
         else:
-            print("\nInvalid format. See 'HLP' command for required inputs for the 'RER' command.\n")
+            print("\nInvalid format. See 'HLP' command for required inputs for the 'RER' command.")
 
     elif(command_List.get(userInput[0]) == 15):
         #EXD
@@ -355,7 +355,7 @@ def ABA(filekey):
             input1 = str.split(input1)
             chooseResponse(input1, filekey)
         else:
-            print("Please enter a command.\n")
+            print("Please enter a command.")
 
 def generateKey():
     if path.exists("filekey.key"):
@@ -381,10 +381,11 @@ if __name__ == "__main__":
     user_info = open("permissions.csv") 
 
     for line in csv.reader(user_info):
-        authenticate.saved_data[line[0]] = line[1]
+        if len(line) > 1:
+            authenticate.saved_data[line[0]] = line[1]
 
     if not authenticate.saved_data:
-        print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.\n")
+        print("\nCreate a unique userID. ID may contain 1-16 upper- or lower-case letters or numbers.")
         username = input("Choose a username for the admin account: ")
         authenticate.first_admin(username,cur_audit_log)
     user_info.close()
